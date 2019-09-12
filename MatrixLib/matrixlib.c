@@ -151,67 +151,69 @@ mat4 sub(mat4 m, mat4 m2){
 mat4 multiply(mat4 a, mat4 b){
 	mat4 c;
 
-	c.x.x = (a.x.x * b.x.x) + (a.x.y * b.y.x) + (a.x.z * b.z.x) + (a.x.w * b.w.x);
-	c.y.x = (a.y.x * b.x.x) + (a.y.y * b.y.x) + (a.y.z * b.z.x) + (a.y.w * b.w.x);
-	c.z.x = (a.z.x * b.x.x) + (a.z.y * b.y.x) + (a.z.z * b.z.x) + (a.z.w * b.w.x);
-	c.w.x = (a.w.x * b.x.x) + (a.w.y * b.y.x) + (a.w.z * b.z.x) + (a.w.w * b.w.x);
+	c.x.x = (a.x.x * b.x.x) + (a.y.x * b.x.y) + (a.z.x * b.x.z) + (a.w.x * b.x.w);
+	c.x.y = (a.x.y * b.x.x) + (a.y.y * b.x.y) + (a.z.y * b.x.z) + (a.w.y * b.x.w);
+	c.x.z = (a.x.z * b.x.x) + (a.y.z * b.x.y) + (a.z.z * b.x.z) + (a.w.z * b.x.w);
+	c.x.w = (a.x.w * b.x.x) + (a.y.w * b.x.y) + (a.z.w * b.x.z) + (a.w.w * b.x.w);
 
-	c.x.y = (a.x.x * b.x.y) + (a.x.y * b.y.y) + (a.x.z * b.z.y) + (a.x.w * b.w.y);
-	c.y.y = (a.y.x * b.x.y) + (a.y.y * b.y.y) + (a.y.z * b.z.y) + (a.y.w * b.w.y);
-	c.z.y = (a.z.x * b.x.y) + (a.z.y * b.y.y) + (a.z.z * b.z.y) + (a.z.w * b.w.y);
-	c.w.y = (a.w.x * b.x.y) + (a.w.y * b.y.y) + (a.w.z * b.z.y) + (a.w.w * b.w.y);
+	c.y.x = (a.y.x * b.y.x) + (a.y.x * b.y.y) + (a.z.x * b.y.z) + (a.w.x * b.y.w);
+	c.y.y = (a.y.y * b.y.x) + (a.y.y * b.y.y) + (a.z.y * b.y.z) + (a.w.y * b.y.w);
+	c.y.z = (a.y.z * b.y.x) + (a.y.z * b.y.y) + (a.z.z * b.y.z) + (a.w.z * b.y.w);
+	c.y.w = (a.y.w * b.y.x) + (a.y.w * b.y.y) + (a.z.w * b.y.z) + (a.w.w * b.y.w);
 
-	c.x.z = (a.x.x * b.x.z) + (a.x.y * b.y.z) + (a.x.z * b.z.z) + (a.x.w * b.w.z);
-	c.y.z = (a.y.x * b.x.z) + (a.y.y * b.y.z) + (a.y.z * b.z.z) + (a.y.w * b.w.z);
-	c.z.z = (a.z.x * b.x.z) + (a.z.y * b.y.z) + (a.z.z * b.z.z) + (a.z.w * b.w.z);
-	c.w.z = (a.w.x * b.x.z) + (a.w.y * b.y.z) + (a.w.z * b.z.z) + (a.w.w * b.w.z);
+	c.z.x = (a.z.x * b.z.x) + (a.y.x * b.z.y) + (a.z.x * b.z.z) + (a.w.x * b.z.w);
+	c.z.y = (a.z.y * b.z.x) + (a.y.y * b.z.y) + (a.z.y * b.z.z) + (a.w.y * b.z.w);
+	c.z.z = (a.z.z * b.z.x) + (a.y.z * b.z.y) + (a.z.z * b.z.z) + (a.w.z * b.z.w);
+	c.z.w = (a.z.w * b.z.x) + (a.y.w * b.z.y) + (a.z.w * b.z.z) + (a.w.w * b.z.w);
 
-	c.x.w = (a.x.x * b.x.w) + (a.x.y * b.y.w) + (a.x.z * b.z.w) + (a.x.w * b.w.w);
-	c.y.w = (a.y.x * b.x.w) + (a.y.y * b.y.w) + (a.y.z * b.z.w) + (a.y.w * b.w.w);
-	c.z.w = (a.z.x * b.x.w) + (a.z.y * b.y.w) + (a.z.z * b.z.w) + (a.z.w * b.w.w);
-	c.w.w = (a.w.x * b.x.w) + (a.w.y * b.y.w) + (a.w.z * b.z.w) + (a.w.w * b.w.w);
+	c.w.x = (a.w.x * b.w.x) + (a.y.x * b.w.y) + (a.z.x * b.w.z) + (a.w.x * b.w.w);
+	c.w.y = (a.w.y * b.w.x) + (a.y.y * b.w.y) + (a.z.y * b.w.z) + (a.w.y * b.w.w);
+	c.w.z = (a.w.z * b.w.x) + (a.y.z * b.w.y) + (a.z.z * b.w.z) + (a.w.z * b.w.w);
+	c.w.w = (a.w.w * b.w.x) + (a.y.w * b.w.y) + (a.z.w * b.w.z) + (a.w.w * b.w.w);
 
 	return c;
 }
 
-// Inverse of a matrix
+// Inverse of a matrix Process
+// Calculate the matrix of minors
+mat4 matrixOfMinor(mat4 m){
+	
+}
 
 // Generates the transpose of a matrix
 mat4 transpose(mat4 m){
 	mat4 b;
 
 	b.x.x = a.x.x;
-	b.x.y = a.y.x;
-	b.x.z = a.z.x;
-	b.x.w = a.w.x;
-
 	b.y.x = a.x.y;
-	b.y.y = a.y.y;
-	b.y.z = a.z.y;
-	b.y.w = a.w.y;
-
 	b.z.x = a.x.z;
-	b.z.y = a.y.z;
-	b.z.z = a.z.z;
-	b.z.w = a.w.z;
-
 	b.w.x = a.x.w;
+
+	b.x.y = a.y.x;
+	b.y.y = a.y.y;
+	b.z.y = a.y.z;
 	b.w.y = a.y.w;
+
+	b.x.z = a.z.x;
+	b.y.z = a.z.y;
+	b.z.z = a.z.z;
 	b.w.z = a.z.w;
+
+	b.x.w = a.w.x;
+	b.y.w = a.w.y;
+	b.z.w = a.w.z;
 	b.w.w = a.w.w;
 
 	return b;
 }
 
 // Matrix-vector multiplication
+vec4 multiply(mat4 a, vec4 v){
+	vec4 result;
+	result.x = (a.x.x * v.x) + (a.y.x * v.y) + (a.z.x * v.z) + (a.w.x * v.w);
+	result.y = (a.x.y * v.x) + (a.y.y * v.y) + (a.z.y * v.z) + (a.w.y * v.w);
+	result.z = (a.x.z * v.x) + (a.y.z * v.y) + (a.z.z * v.z) + (a.w.z * v.w);
+	result.w = (a.x.w * v.x) + (a.y.w * v.y) + (a.z.w * v.z) + (a.w.w * v.w);
 
-
-
-
-
-
-
-
-
-
-
+	return result;
+}
