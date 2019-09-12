@@ -176,8 +176,27 @@ mat4 multiply(mat4 a, mat4 b){
 
 // Inverse of a matrix Process
 // Calculate the matrix of minors
-mat4 matrixOfMinor(mat4 m){
+mat4 matrixOfMinor(mat4 a){
+	mat4 m;
 	
+	m.x.x = (a.y.y * a.z.z * a.w.w) + (a.z.y * a.w.z * a.y.w) + (a.w.y * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.y) - (a.z.w * a.w.z * a.y.y) - (a.w.w * a.y.z * a.z.y);
+	m.x.y = (a.y.x * a.z.z * a.w.w) + (a.z.x * a.w.z * a.y.w) + (a.w.x * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.x) - (a.z.w * a.w.z * a.y.x) - (a.w.w * a.y.z * a.z.x);
+	m.x.z = (a.y.x * a.z.y * a.w.w) + (a.z.x * a.w.y * a.y.w) + (a.w.x * a.y.y * a.z.w) - (a.y.w * a.z.y * a.w.x) - (a.z.w * a.w.y * a.y.x) - (a.w.w * a.y.y * a.z.x);
+	m.x.w = (a.y.x * a.z.y * a.w.z) + (a.z.x * a.w.y * a.y.z) + (a.w.x * a.y.y * a.z.z) - (a.y.z * a.z.y * a.w.x) - (a.z.z * a.w.y * a.y.x) - (a.w.z * a.y.y * a.z.x);
+	m.y.x = (a.x.y * a.z.z * a.w.w) + (a.z.y * a.w.z * a.x.w) + (a.w.y * a.x.z * a.z.w) - (a.x.w * a.z.z * a.w.y) - (a.z.w * a.w.z * a.x.y) - (a.w.w * a.x.z * a.z.y);
+	m.y.y = (a.x.x * a.z.z * a.w.w) + (a.z.x * a.w.z * a.x.w) + (a.w.x * a.x.z * a.z.w) - (a.x.w * a.z.z * a.w.x) - (a.z.w * a.w.z * a.x.x) - (a.w.w * a.x.z * a.z.x);
+	m.y.z = (a.x.x * a.z.y * a.w.w) + (a.z.x * a.w.y * a.x.w) + (a.w.x * a.x.y * a.z.w) - (a.x.w * a.z.y * a.w.x) - (a.z.w * a.w.y * a.x.x) - (a.w.w * a.x.y * a.z.x);
+	m.y.w = (a.x.x * a.z.y * a.w.z) + (a.z.x * a.w.y * a.x.z) + (a.w.x * a.x.y * a.z.z) - (a.x.z * a.z.y * a.w.x) - (a.z.z * a.w.y * a.x.x) - (a.w.z * a.x.y * a.z.x);
+	m.z.x = (a.x.y * a.y.z * a.w.w) + (a.y.y * a.w.z * a.x.w) + (a.w.y * a.x.z * a.y.w) - (a.x.w * a.y.z * a.w.y) - (a.y.w * a.w.z * a.x.y) - (a.w.w * a.x.z * a.y.y);
+	m.z.y = (a.x.x * a.y.z * a.w.w) + (a.y.x * a.w.z * a.x.w) + (a.w.x * a.x.z * a.y.w) - (a.x.w * a.y.z * a.w.x) - (a.y.w * a.w.z * a.x.x) - (a.w.w * a.x.z * a.y.x);
+	m.z.z = (a.x.x * a.y.y * a.w.w) + (a.y.x * a.w.y * a.x.w) + (a.w.x * a.x.y * a.y.w) - (a.x.w * a.y.y * a.w.x) - (a.y.w * a.w.y * a.x.x) - (a.w.w * a.x.y * a.y.x);
+	m.z.w = (a.x.x * a.y.y * a.w.z) + (a.y.x * a.w.y * a.x.z) + (a.w.x * a.x.y * a.y.z) - (a.x.z * a.y.y * a.w.x) - (a.y.z * a.w.y * a.x.x) - (a.w.z * a.x.y * a.y.x);
+	m.w.x = (a.x.y * a.y.z * a.z.w) + (a.y.y * a.z.z * a.x.w) + (a.z.y * a.x.z * a.y.w) - (a.x.w * a.y.z * a.z.y) - (a.y.w * a.z.z * a.x.y) - (a.z.w * a.x.z * a.y.y);
+	m.w.y = (a.x.x * a.y.z * a.z.w) + (a.y.x * a.z.z * a.x.w) + (a.z.x * a.x.z * a.y.w) - (a.x.w * a.y.z * a.z.x) - (a.y.w * a.z.z * a.x.x) - (a.z.w * a.x.z * a.y.x);
+	m.w.z = (a.x.x * a.y.y * a.z.w) + (a.y.x * a.z.y * a.x.w) + (a.z.x * a.x.y * a.y.w) - (a.x.w * a.y.y * a.z.x) - (a.y.w * a.z.y * a.x.x) - (a.z.w * a.x.y * a.y.x);
+	m.w.w = (a.x.x * a.y.y * a.z.z) + (a.y.x * a.z.y * a.x.z) + (a.z.x * a.x.y * a.y.z) - (a.x.z * a.y.y * a.z.x) - (a.y.z * a.z.y * a.x.x) - (a.z.z * a.x.y * a.y.x);
+	
+	return m;
 }
 
 // Generates the transpose of a matrix
