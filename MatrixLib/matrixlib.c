@@ -1,36 +1,15 @@
 // Written by Griffin Lynch
 #include "matrixlib.h"
 
-int main(void){
-	vec4 v = {1, 2, 3, 4};
-	vec4 v2 = {2, 3, 4, 5};
-
-	print(v);
-	print(v2);
-	v = multiply(5, v);
-	print(v);
-	v2 = add(v, v2);
-	print(v2);
-	v = sub(v, v2);
-	print(v);
-
-	printf("v: ");
-	print(v);
-	printf("v2: ");
-	print(v2);
-
-	return 0;
-}
-
 // Simple Function to print out a 4x1 vector on a screen
 // Note the vector is printed as a row vector, though we consider them to be
 // 	column vectors internally
-void print(vec4 v){
+void vector_print(vec4 v){
 	printf("[%.2f, %.2f, %.2f, %.2f]\n", v.x, v.y, v.z, v.w);
 }
 
 // Multiplies each element in a vector by a scalar value and returns the result
-vec4 multiply(float s, vec4 v){
+vec4 scalar_vector_multiply(float s, vec4 v){
 	v.x *= s;
 	v.y *= s;
 	v.z *= s;
@@ -39,7 +18,7 @@ vec4 multiply(float s, vec4 v){
 }
 
 // Adds together two vectors, and returns the result
-vec4 add(vec4 v, vec4 v2){
+vec4 vector_add(vec4 v, vec4 v2){
 	v.x += v2.x;
 	v.y += v2.y;
 	v.z += v2.z;
@@ -48,11 +27,26 @@ vec4 add(vec4 v, vec4 v2){
 }
 
 // Subtracts one vector from another and returns the result
-vec4 sub(vec4 v, vec4 v2){
+vec4 vector_sub(vec4 v, vec4 v2){
 	v.x -= v2.x;
 	v.y -= v2.y;
 	v.z -= v2.z;
 	v.w -= v2.w;
+	return v;
+}
+
+// Calculate the magnitude of a vector
+float magnitude(vec4 v){
+	return (float)sqrt((double)(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w)); 
+}
+
+// Normalize a vector, that is, set its magnitude to 1
+vec4 vector_normalize(vec4 v){
+	float mag = magnitude(v);
+	v.x /= mag;
+	v.y /= mag;
+	v.z /= mag;
+	v.w /= mag;
 	return v;
 }
 
@@ -72,7 +66,7 @@ vec4 cross_product(vec4 v, vec4 v2){
 }
 
 // prints out a 4x4 matrix
-void print(mat4 m){
+void matrix_print(mat4 m){
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.x, m.y.x, m.z.x, m.w.x);
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.y, m.y.y, m.z.y, m.w.y);
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.z, m.y.z, m.z.z, m.w.z);
@@ -81,7 +75,7 @@ void print(mat4 m){
 
 
 // multiplies a matrix by a scalar
-mat4 multiply(float s, mat4 m){
+mat4 scalar_matrix_multiply(float s, mat4 m){
 	m.x.x *= s;
 	m.x.y *= s;
 	m.x.z *= s;
@@ -103,7 +97,7 @@ mat4 multiply(float s, mat4 m){
 }
 
 // adds m2 to m
-mat4 add(mat4 m, mat4 m2){
+mat4 matrix_add(mat4 m, mat4 m2){
 	m.x.x += m2.x.x;
 	m.x.y += m2.x.y;
 	m.x.z += m2.x.z;
@@ -126,7 +120,7 @@ mat4 add(mat4 m, mat4 m2){
 
 
 // subtracts m2 from m
-mat4 sub(mat4 m, mat4 m2){
+mat4 matrix_sub(mat4 m, mat4 m2){
 	m.x.x -= m2.x.x;
 	m.x.y -= m2.x.y;
 	m.x.z -= m2.x.z;
@@ -148,7 +142,7 @@ mat4 sub(mat4 m, mat4 m2){
 }
 
 // multiplies two 4x4 matrices
-mat4 multiply(mat4 a, mat4 b){
+mat4 matrix_matrix_multiply(mat4 a, mat4 b){
 	mat4 c;
 
 	c.x.x = (a.x.x * b.x.x) + (a.y.x * b.x.y) + (a.z.x * b.x.z) + (a.w.x * b.x.w);
@@ -225,31 +219,31 @@ float determinant(mat4 m, mat4 n){
 mat4 transpose(mat4 m){
 	mat4 b;
 
-	b.x.x = a.x.x;
-	b.y.x = a.x.y;
-	b.z.x = a.x.z;
-	b.w.x = a.x.w;
+	b.x.x = m.x.x;
+	b.y.x = m.x.y;
+	b.z.x = m.x.z;
+	b.w.x = m.x.w;
 
-	b.x.y = a.y.x;
-	b.y.y = a.y.y;
-	b.z.y = a.y.z;
-	b.w.y = a.y.w;
+	b.x.y = m.y.x;
+	b.y.y = m.y.y;
+	b.z.y = m.y.z;
+	b.w.y = m.y.w;
 
-	b.x.z = a.z.x;
-	b.y.z = a.z.y;
-	b.z.z = a.z.z;
-	b.w.z = a.z.w;
+	b.x.z = m.z.x;
+	b.y.z = m.z.y;
+	b.z.z = m.z.z;
+	b.w.z = m.z.w;
 
-	b.x.w = a.w.x;
-	b.y.w = a.w.y;
-	b.z.w = a.w.z;
-	b.w.w = a.w.w;
+	b.x.w = m.w.x;
+	b.y.w = m.w.y;
+	b.z.w = m.w.z;
+	b.w.w = m.w.w;
 
 	return b;
 }
 
 // Matrix-vector multiplication
-vec4 multiply(mat4 a, vec4 v){
+vec4 matrix_vector_multiply(mat4 a, vec4 v){
 	vec4 result;
 	result.x = (a.x.x * v.x) + (a.y.x * v.y) + (a.z.x * v.z) + (a.w.x * v.w);
 	result.y = (a.x.y * v.x) + (a.y.y * v.y) + (a.z.y * v.z) + (a.w.y * v.w);
@@ -266,11 +260,11 @@ mat4 inverse(mat4 m){
 	mom = cofactor(mom); // Cofactors the Matrix of minor
 	float det = determinant(m, mom); // Figures out the determinant using the cofactored Matrix of Minor
 	
-	if(det == 0) return NULL; // This would be a serious issue
+	// We can apparently assume that det is non-zero
 	
 	det = 1/det;
 	mom = transpose(mom);
-	mom = multiply(det, mom);
+	mom = scalar_matrix_multiply(det, mom);
 	return mom;
 }
 
