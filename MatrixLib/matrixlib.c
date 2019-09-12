@@ -178,7 +178,9 @@ mat4 multiply(mat4 a, mat4 b){
 // Calculate the matrix of minors
 mat4 matrixOfMinor(mat4 a){
 	mat4 m;
-	
+
+	// These lines were written by a python program, lmao
+	// I did write the python program though, so at least give me credit for that	
 	m.x.x = (a.y.y * a.z.z * a.w.w) + (a.z.y * a.w.z * a.y.w) + (a.w.y * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.y) - (a.z.w * a.w.z * a.y.y) - (a.w.w * a.y.z * a.z.y);
 	m.x.y = (a.y.x * a.z.z * a.w.w) + (a.z.x * a.w.z * a.y.w) + (a.w.x * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.x) - (a.z.w * a.w.z * a.y.x) - (a.w.w * a.y.z * a.z.x);
 	m.x.z = (a.y.x * a.z.y * a.w.w) + (a.z.x * a.w.y * a.y.w) + (a.w.x * a.y.y * a.z.w) - (a.y.w * a.z.y * a.w.x) - (a.z.w * a.w.y * a.y.x) - (a.w.w * a.y.y * a.z.x);
@@ -197,6 +199,26 @@ mat4 matrixOfMinor(mat4 a){
 	m.w.w = (a.x.x * a.y.y * a.z.z) + (a.y.x * a.z.y * a.x.z) + (a.z.x * a.x.y * a.y.z) - (a.x.z * a.y.y * a.z.x) - (a.y.z * a.z.y * a.x.x) - (a.z.z * a.x.y * a.y.x);
 	
 	return m;
+}
+
+// Returns the cofactor of a matrix
+mat4 cofactor(mat4 m){
+	m.x.y *= -1;
+	m.x.w *= -1;
+	m.y.x *= -1;
+	m.y.z *= -1;
+	m.z.y *= -1;
+	m.z.w *= -1;
+	m.w.x *= -1;
+	m.w.z *= -1;
+
+	return m;
+}
+
+// Find the determinant of the 4x4 matrix and its 4x4 matrix of minor NOTE: DO THIS AFTER YOU APPLY THE COFACTOR
+float determinant(mat4 m, mat4 n){
+	float det = m.x.x * n.x.x + m.y.x * n.y.x + m.z.x * n.z.x + m.w.x * n.w.x;
+	return det;
 }
 
 // Generates the transpose of a matrix
@@ -236,3 +258,21 @@ vec4 multiply(mat4 a, vec4 v){
 
 	return result;
 }
+
+// Returns the inverse of a matrix, using many of the above helper functions
+// This is the only function that calls other functions in this library. Let's hope it doesn't slow everything down.
+mat4 inverse(mat4 m){
+	mat4 mom = matrixOfMinor(m); // Generates the Matrix of minor, which is perhaps trivially obvious given the function name. Oh well.
+	mom = cofactor(mom); // Cofactors the Matrix of minor
+	float det = determinant(m, mom); // Figures out the determinant using the cofactored Matrix of Minor
+	
+	if(det == 0) return NULL; // This would be a serious issue
+	
+	det = 1/det;
+	mom = transpose(mom);
+	mom = multiply(det, mom);
+	return mom;
+}
+
+
+
