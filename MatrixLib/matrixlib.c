@@ -70,7 +70,7 @@ void matrix_print(mat4 m){
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.x, m.y.x, m.z.x, m.w.x);
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.y, m.y.y, m.z.y, m.w.y);
 	printf("| %.2f %.2f %.2f %.2f |\n", m.x.z, m.y.z, m.z.z, m.w.z);
-	printf("|_%.2f %.2f %.2f %.2f |\n", m.x.w, m.y.w, m.z.w, m.w.w);
+	printf("|_%.2f %.2f %.2f %.2f_|\n", m.x.w, m.y.w, m.z.w, m.w.w);
 }
 
 
