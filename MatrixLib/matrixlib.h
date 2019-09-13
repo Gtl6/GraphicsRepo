@@ -20,10 +20,10 @@ void vector_print(vec4 v);
 vec4 scalar_vector_multiply(float s, vec4 v);
 vec4 vector_add(vec4 v, vec4 v2);
 vec4 vector_sub(vec4 v, vec4 v2);
-float vector_magnitude(vec4 v);
+float magnitude(vec4 v);
 float dot_product(vec4 v, vec4 v2);
 vec4 cross_product(vec4 v, vec4 v2);
-vec4 vector_normalize(vec4);
+vec4 normalize(vec4);
 
 void matrix_print(mat4 m);
 mat4 scalar_matrix_multiply(float s, mat4 m);

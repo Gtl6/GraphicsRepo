@@ -41,7 +41,7 @@ float magnitude(vec4 v){
 }
 
 // Normalize a vector, that is, set its magnitude to 1
-vec4 vector_normalize(vec4 v){
+vec4 normalize(vec4 v){
 	float mag = magnitude(v);
 	v.x /= mag;
 	v.y /= mag;
