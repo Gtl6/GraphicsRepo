@@ -25,14 +25,14 @@ int main(){
 	matrix_print(scalar_matrix_multiply(s, m2));
 	matrix_print(matrix_add(m1, m2));
 	matrix_print(matrix_sub(m1, m2));
-	matrix_print(matrix_multiply(m1, m2));
-	matrix_print(matrix_multiply(m2, m1));
+	matrix_print(matrix_matrix_multiply(m1, m2));
+	matrix_print(matrix_matrix_multiply(m2, m1));
 	matrix_print(inverse(m1));
 	matrix_print(inverse(m2));
 	matrix_print(transpose(m1));
 	matrix_print(transpose(m2));
-	matrix_print(matrix_vector_multiply(m1, v1));
-	matrix_print(matrix_vector_multiply(m2, v1));
+	vector_print(matrix_vector_multiply(m1, v1));
+	vector_print(matrix_vector_multiply(m2, v1));
 	
 	return 0;
 }
