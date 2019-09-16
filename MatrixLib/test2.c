@@ -14,7 +14,7 @@ int main(){
 	printf("%.2f\n", dot_product(v1, cross_product(v1, v2)));
 	printf("\n");
 	printf("%.2f\n", dot_product(v1, vector_add(v1, v2)));
-	printf("%.2f\n", dot_product(vector_add(v1, v1), vector_add(v1, v2)));
+	printf("%.2f\n", dot_product(v1, v1) + dot_product(v1, v2));
 	printf("\n");
 	matrix_print(transpose(I));
 	matrix_print(inverse(I));
