@@ -33,7 +33,7 @@ typedef struct
 } vec4;
 
 // I don't like using #define any more than you do, but it seems like the best way to do it
-#define RESOLUTION 16
+#define RESOLUTION 32
 int num_vertices = RESOLUTION * 6;
 
 // The cone will be from y = -1 to y = 1
@@ -43,14 +43,14 @@ void generate_vertices(int res, vec4 *arr){
 	float chunksize = (2.0f * 3.1415926535f) / res;
 	for(i = 0; i < res; i++){
 		// add the center
-		vec4 made = {0, -0.5f, 0, 0};
+		vec4 made = {0, -0.5f, 0, 1.0f};
 		arr[index] = made;
 		index++;
 		// The two points we need to generate, and remember the right hand rule!
-		float x1 = cosf(chunksize * (i + 1));
-		float z1 = sinf(chunksize * (i + 1));
-		float x2 = cosf(chunksize * i);
-		float z2 = sinf(chunksize * i);
+		float x1 = 0.5f * cosf(chunksize * (i + 1));
+		float z1 = 0.5f * sinf(chunksize * (i + 1));
+		float x2 = 0.5f * cosf(chunksize * i);
+		float z2 = 0.5f * sinf(chunksize * i);
 		made.x = x1;
 		made.z = z1;
 		arr[index] = made;
@@ -87,8 +87,12 @@ float random_col(){
 void generate_colors(int res, vec4 *arr){
 	// Just need to fill the list with res * 2 random colors
 	int i;
-	for(i = 0; i < res * 2; i++){
+	for(i = 0; i < res * 6; i++){
 		vec4 col = {random_col(), random_col(), random_col(), 1.0f};
+		arr[i] = col;
+		i++;
+		arr[i] = col;
+		i++;
 		arr[i] = col;
 	}
 }
@@ -104,7 +108,7 @@ void init(void)
 
 	vec4 vertices[RESOLUTION * 6];
    	generate_vertices(RESOLUTION, vertices);
-	vec4 colors[RESOLUTION * 2];
+	vec4 colors[RESOLUTION * 6];
    	generate_colors(RESOLUTION, colors);
 
     GLuint buffer;
