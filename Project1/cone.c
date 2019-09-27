@@ -1,8 +1,8 @@
 /*
- * triangle.c
+ * Project1.c
  *
- *  Created on: Aug 28, 2017
- *      Author: Thumrongsak Kosiyatrakul
+ *  Created on: September 26, 2019
+ *      Author: Griffin Lynch
  */
 
 
@@ -157,15 +157,9 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(512, 512);
     glutInitWindowPosition(100,100);
-    glutCreateWindow("Lab 3 - Cone");
+    glutCreateWindow("Project1 - Cone");
     glewInit();
     init();
-
-    printf("top: [0, 0.5, 0, 1]\n");
-    printf("bottom: [0, -0.5, 0, 1]\n");
-    printf("vertices used: %d\n", RESOLUTION* 6);
-    printf("height of cone: 1\n");
-
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
