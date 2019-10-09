@@ -28,7 +28,7 @@
 const float circle_radius = 0.05;
 const int circle_resolution = 8;
 const float coil_space = 0.05;
-const int num_coils = 1;
+const int num_coils = 5;
 const int coil_resolution = 8;
 const float coil_center_radius = 0.2;
 
@@ -105,10 +105,10 @@ void generate_tube(vec4 *arr, float height, int which_tube){
 		float front_angle2 = (angle_count + 1) * CIRCANGLE;
 		// In order, our point, the next point on the circle, our point on the other side of the tube, and the next point on the other side of the tube
 		// Do you ever look at a line of code (or four) and wonder where your life went so horribly wrong?
-		vec4 p1 = {top_radius(front_angle1) * sin(top_angle1), height + sin(front_angle1), top_radius(front_angle1) * cos(top_angle1), 1.0};
-		vec4 p2 = {top_radius(front_angle2) * sin(top_angle1), height + sin(front_angle2), top_radius(front_angle2) * cos(top_angle1), 1.0};
-		vec4 p3 = {top_radius(front_angle1) * sin(top_angle2), height2 + sin(front_angle1), top_radius(front_angle1) * cos(top_angle2), 1.0};
-		vec4 p4 = {top_radius(front_angle2) * sin(top_angle2), height2 + sin(front_angle2), top_radius(front_angle2) * cos(top_angle2), 1.0};
+		vec4 p1 = {top_radius(front_angle1) * sin(top_angle1), height + circle_radius * sin(front_angle1), top_radius(front_angle1) * cos(top_angle1), 1.0};
+		vec4 p2 = {top_radius(front_angle2) * sin(top_angle1), height + circle_radius * sin(front_angle2), top_radius(front_angle2) * cos(top_angle1), 1.0};
+		vec4 p3 = {top_radius(front_angle1) * sin(top_angle2), height2 + circle_radius * sin(front_angle1), top_radius(front_angle1) * cos(top_angle2), 1.0};
+		vec4 p4 = {top_radius(front_angle2) * sin(top_angle2), height2 + circle_radius * sin(front_angle2), top_radius(front_angle2) * cos(top_angle2), 1.0};
 
 		// On the plus side, I somehow managed to make it so that the surface's normal angle doesn't matter
 		// Don't ask me how. Absolutely bonkers how that worked out.
