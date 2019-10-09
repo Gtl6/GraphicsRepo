@@ -1,0 +1,7 @@
+Griffin Lynch
+gtl6@pitt.edu
+9/27/19
+includes c and h files for the matrix library, and the test as specified by the instructions, as well as the make file to compile the test program
+just type make
+Each of the functions are implemented as specified by the requires, as well as including the point manipulation (translate, rotate, scale) operations for project 1
+Yes, everything runs fine 
