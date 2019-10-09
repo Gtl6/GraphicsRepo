@@ -76,10 +76,10 @@ void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
 void generate_circles(vec4 *arr){
 	float x = 0;
 	float y = 1.0 / 2.0 * (num_coils) * (coil_space + 2 * circle_radius); // We have our spring centered at the origin, so this is gross
-	float z = inner_radius + circle_radius;
+	float z = coil_center_radius;
 
 	generate_one_circle(arr, x, y, z, 0);
-	generate_one_circle(arr + CIRCLEVERTCOUNT, x, -1 * y, z, 1) // But since it's at the origin, this is easy
+	generate_one_circle(arr + CIRCLEVERTCOUNT, x, -1 * y, z, 1); // But since it's at the origin, this is easy
 }
 
 float top_radius(float front_angle){
@@ -95,8 +95,8 @@ void generate_tube(vec4 *arr, float height, int which_tube){
 
 	for(i = 0; i < 6 * circle_resolution; i++){
 		int angle_count = i / 6;
-		float front_angle1 = angle_count * CIRCLEANGLE;
-		float front_angle2 = (angle_count + 1) * CIRCLEANGLE;
+		float front_angle1 = angle_count * CIRCANGLE;
+		float front_angle2 = (angle_count + 1) * CIRCANGLE;
 		// In order, our point, the next point on the circle, our point on the other side of the tube, and the next point on the other side of the tube
 		// Do you ever look at a line of code (or four) and wonder where your life went so horribly wrong?
 		vec4 p1 = {top_radius(front_angle1) * sin(top_angle1), height + sin(front_angle1), top_radius(front_angle1) * cos(top_angle1), 1.0};
@@ -181,7 +181,7 @@ void init(void)
     glBindVertexArray(vao);
 
 	vec4 vertices[NUMVERTICES];
-	generate_vertices(vertices);
+	generate_spring(vertices);
 	vec4 colors[NUMVERTICES];
 	generate_colors(colors);
 
@@ -214,7 +214,7 @@ void display(void)
     
 	glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
 
-	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+	glDrawArrays(GL_TRIANGLES, 0, NUMVERTICES);
     glutSwapBuffers();
 }
 
