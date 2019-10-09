@@ -185,6 +185,12 @@ void init(void)
 	vec4 colors[NUMVERTICES];
 	generate_colors(colors);
 
+	int i;
+	for(i = 0; i < NUMVERTICES; i++){
+		vec4 thisone = vertices[i];
+		printf("[%.3f, %.3f, %.3f, %.3f]\n", thisone.x, thisone.y, thisone.z, thisone.w);
+	}
+
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
