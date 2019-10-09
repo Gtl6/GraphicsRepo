@@ -28,7 +28,7 @@
 const float circle_radius = 0.05;
 const int circle_resolution = 8;
 const float coil_space = 0.05;
-const int num_coils = 5;
+const int num_coils = 7;
 const int coil_resolution = 8;
 const float coil_center_radius = 0.2;
 
@@ -42,6 +42,7 @@ float TUBEHEIGHTS = (2 * circle_radius + coil_space) / coil_resolution;
 
 GLuint ctm_location;
 mat4 ctm;
+float spring_rotate = 0;
 
 // Will generate just one circle at a time, because I like making functions and offloading effort instead of actually writing code
 void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
@@ -225,6 +226,8 @@ void display(void)
 
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
+
+	ctm = rotate_y(spring_rotate);
     
 	glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
 
@@ -241,7 +244,8 @@ void keyboard(unsigned char key, int mousex, int mousey)
 }
 
 void idle(void){
-	// Continue rotation, if there is any
+	spring_rotate += 0.05;
+	glutPostRedisplay();
 }
 
 int main(int argc, char **argv)
