@@ -28,15 +28,15 @@
 const float circle_radius = 0.05;
 const int circle_resolution = 8;
 const float coil_space = 0.05;
-const int num_coils = 5;
+const int num_coils = 1;
 const int coil_resolution = 8;
-const int coil_center_radius = 0.2;
+const float coil_center_radius = 0.2;
 
 // Calculates the number of vertices
 int CIRCLEVERTCOUNT = 3 * circle_resolution;
 int COILVERTCOUNT = 6 * circle_resolution * coil_resolution;
 int NUMVERTICES = COILVERTCOUNT * num_coils + 2 * CIRCLEVERTCOUNT;
-float CIRCANGLE = 2 * PI / circle_radius;
+float CIRCANGLE = 2 * PI / circle_resolution;
 float TUBEANGLE = 2 * PI / coil_resolution;
 float TUBEHEIGHTS = (2 * circle_radius + coil_space) / coil_resolution;
 
@@ -46,29 +46,34 @@ mat4 ctm;
 // Will generate just one circle at a time, because I like making functions and offloading effort instead of actually writing code
 void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
 	int i;
-	for(i = 0; i < CIRCLEVERTCOUNT; i++){
+	for(i = 0; i < 3 * circle_resolution; i++){
 		// Dealing with the angle_numth triangle
 		int angle_num = i / 3;
 		float theta = CIRCANGLE * angle_num;
 
-		vec4 center = {x, y, z, 1.0};
-		vec4 p1 = {x, y + circle_radius * sin(theta), z + circle_radius * cos(theta), 1.0};
-		vec4 p2 = {x, y + circle_radius * sin(theta + CIRCANGLE), z + circle_radius * cos(theta + CIRCANGLE), 1.0};
+		// The first is the center, the second is our point, the third is the next point counter-clockwise
+		vec4 center = {0, 0, 0, 1.0};
+		vec4 p1 = {circle_radius * cos(theta), circle_radius * sin(theta), 0, 1.0};
+		vec4 p2 = {circle_radius * cos(theta + CIRCANGLE), circle_radius * sin(theta + CIRCANGLE), 0, 1.0};
+
+		// Rotate and translate the points
+		float angle = PI / 2;
+		if(is_left) angle *= -1;
+		mat4 ry = rotate_y(angle);
+		mat4 trans_mat = translate(x, y, z);
+		mat4 movement_mat = matrix_matrix_multiply(trans_mat, ry);
+		vec4 new_center = matrix_vector_multiply(movement_mat, center);
+		vec4 new_p1 = matrix_vector_multiply(movement_mat, p1);
+		vec4 new_p2 = matrix_vector_multiply(movement_mat, p2);
+		
+		printf("Your new x is %f\n", x);
 
 		// Load the vertices into the array
-		arr[i] = center;
+		arr[i] = new_center;
 		i++;
-
-		if(is_left){
-			arr[i] = p1;
-			i++;
-			arr[i] = p2;
-		}
-		else{
-			arr[i] = p2;
-			i++;
-			arr[i] = p1;
-		}
+		arr[i] = new_p1;
+		i++;
+		arr[i] = new_p2;
 	}
 }
 
@@ -81,6 +86,7 @@ void generate_circles(vec4 *arr){
 	generate_one_circle(arr, x, y, z, 0);
 	generate_one_circle(arr + CIRCLEVERTCOUNT, x, -1 * y, z, 1); // But since it's at the origin, this is easy
 }
+
 
 float top_radius(float front_angle){
 	return coil_center_radius + circle_radius * cos(front_angle);
@@ -153,6 +159,8 @@ void generate_spring(vec4 *arr){
 		generate_coil(arr + circle_offset + i * (COILVERTCOUNT), start_height + i * coil_height);
 	}
 }
+
+
 
 float random_col(){
 	return (float)(rand() % 100) / 100;
