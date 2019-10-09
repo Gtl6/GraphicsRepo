@@ -67,8 +67,6 @@ void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
 		vec4 new_p1 = matrix_vector_multiply(movement_mat, p1);
 		vec4 new_p2 = matrix_vector_multiply(movement_mat, p2);
 		
-		printf("Your new x is %f\n", x);
-
 		// Load the vertices into the array
 		arr[i] = new_center;
 		i++;
@@ -81,7 +79,7 @@ void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
 // Will generate the circles on the ends of the spring
 void generate_circles(vec4 *arr){
 	float x = 0;
-	float y = 1.0 / 2.0 * (num_coils) * (coil_space + 2 * circle_radius); // We have our spring centered at the origin, so this is gross
+	float y = 0.5 * (coil_space) + 0.5 * (num_coils) * (coil_space + 2 * circle_radius) + circle_radius; // We have our spring centered at the origin, so this is gross
 	float z = coil_center_radius;
 
 	generate_one_circle(arr, x, y, z, 0);
