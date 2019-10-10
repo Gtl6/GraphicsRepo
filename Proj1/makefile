@@ -1,7 +1,7 @@
 LIBS = -lXi -lXmu -lglut -lGLEW -lGLU -lm -lGL
 
-all: lab4.c initShader.o matrixlib.o
-	g++ -o lab4 lab4.c matrixlib.o initShader.o $(LIBS)
+all: proj1.c initShader.o matrixlib.o
+	g++ -o proj1 proj1.c matrixlib.o initShader.o $(LIBS)
 
 initShader.o: initShader.c initShader.h
 	g++ -c initShader.c
