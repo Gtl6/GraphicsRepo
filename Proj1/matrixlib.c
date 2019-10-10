@@ -316,13 +316,15 @@ mat4 rotate_y(float t){
 // Returns a rotation about any arbitrary vector
 mat4 rotate_about_vector(vec4 v, float t){
 	mat4 ret = {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}};
+	vec4 z_proj = {0, 0, v.z, 1.0};
 	vec4 yz = {0, v.y, v.z, 1.0};
 	vec4 y_proj = {0, v.y, 0, 1.0};
+	vec4 xz = {v.x, 0, v.z, 1.0};
 
-	// First figure out the angle between the vector and its yz projection
-	float a = magnitude(v);
-	float b = magnitude(yz);
-	float output = dot_product(v, yz) / (a * b);
+	// First figure out the angle to rotate to get it even with the yz plane
+	float a = magnitude(xz);
+	float b = magnitude(z_proj);
+	float output = dot_product(xz, z_proj) / (a * b);
 	float theta1 = acos(output);
 
 	if(isnan(theta1)) return ret;
@@ -344,5 +346,7 @@ mat4 rotate_about_vector(vec4 v, float t){
 	// And now put the object back
 	ret = matrix_matrix_multiply(rotate_x(-1 * theta2), ret);
 	ret = matrix_matrix_multiply(rotate_y(-1 * theta1), ret);
+
+	return ret;
 }
 

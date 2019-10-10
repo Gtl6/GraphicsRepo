@@ -273,7 +273,10 @@ void mouse(int button, int state, int x, int y){
 }
 
 void idle(){
-	
+	vec4 random_about = {1, 0, 0, 1};
+	mat4 about_mat = rotate_about_vector(random_about, 0.05);
+	ctm = matrix_matrix_multiply(about_mat, ctm);
+	glutPostRedisplay();
 }
 
 // rotates the object according to what we got from the mouse

@@ -313,3 +313,40 @@ mat4 rotate_y(float t){
 	return transpose(returner);
 }
 
+// Returns a rotation about any arbitrary vector
+mat4 rotate_about_vector(vec4 v, float t){
+	mat4 ret = {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}};
+	vec4 z_proj = {0, 0, v.z, 1.0};
+	vec4 yz = {0, v.y, v.z, 1.0};
+	vec4 y_proj = {0, v.y, 0, 1.0};
+	vec4 xz = {v.x, 0, v.z, 1.0};
+
+	// First figure out the angle to rotate to get it even with the yz plane
+	float a = magnitude(xz);
+	float b = magnitude(z_proj);
+	float output = dot_product(xz, z_proj) / (a * b);
+	float theta1 = acos(output);
+
+	if(isnan(theta1)) return ret;
+
+	// Then the angle between the yz projection and the y-axis
+	a = magnitude(yz);
+	b = magnitude(y_proj);
+	output = dot_product(yz, y_proj) / (a * b);
+	float theta2 = acos(output);
+
+	if(isnan(theta2)) return ret;
+
+	// So now we know both of those angles are good, we first rotate to the yz plane
+	ret = matrix_matrix_multiply(rotate_y(theta1), ret);
+	// Now rotate so the thing is on the y-axis
+	ret = matrix_matrix_multiply(rotate_x(theta2), ret);
+	// Now do your actual angle rotation
+	ret = matrix_matrix_multiply(rotate_y(t), ret);
+	// And now put the object back
+	ret = matrix_matrix_multiply(rotate_x(-1 * theta2), ret);
+	ret = matrix_matrix_multiply(rotate_y(-1 * theta1), ret);
+
+	return ret;
+}
+
