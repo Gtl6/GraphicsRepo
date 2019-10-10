@@ -1,8 +1,8 @@
 /*
- * triangle.c
+ * proj1.c
  *
- *  Created on: Aug 28, 2017
- *      Author: Thumrongsak Kosiyatrakul
+ *  Finished on: Oct 10, 2019
+ *      Author: Griffin Lynch
  */
 
 
@@ -26,12 +26,13 @@
 #define PI 3.14159265
 
 // Some constants to set
-const float circle_radius = 0.05;
+// Change them if you like
+const float circle_radius = 0.07;
 const int circle_resolution = 16;
-const float coil_space = 0.1;
+const float coil_space = 0.15;
 const int num_coils = 5;
-const int coil_resolution = 16;
-const float coil_center_radius = 0.2;
+const int coil_resolution = 32;
+const float coil_center_radius = 0.25;
 
 // Just some nice derivations to have on hand, please don't change these
 int CIRCLEVERTCOUNT = 3 * circle_resolution;
@@ -273,10 +274,7 @@ void mouse(int button, int state, int x, int y){
 }
 
 void idle(){
-	vec4 random_about = {1, 1, 1, 1};
-	mat4 about_mat = rotate_about_vector(random_about, 0.05);
-	ctm = matrix_matrix_multiply(about_mat, ctm);
-	glutPostRedisplay();
+	// Do nothing, for now
 }
 
 // rotates the object according to what we got from the mouse
@@ -284,14 +282,15 @@ void rotate_ctm(vec4 v1, vec4 v2){
 	// Fun fact, absolute value is equivalent to magnitude (it's just one-dimensional)
 	float abs1 = magnitude(v1);
 	float abs2 = magnitude(v2);
-	
+
 	float denom = abs1 * abs2;
 	if(denom != 0){
 		float res = dot_product(v1, v2) / denom;
 		float angle = acos(res);
 
 		if(!isnan(angle)){
-			vec4 theperp = cross_product(v1, v2);
+			vec4 theperp = cross_product(scalar_vector_multiply(100, v1), scalar_vector_multiply(100, v2));
+
 			ctm = matrix_matrix_multiply(rotate_about_vector(theperp, angle), ctm);
 		}
 	}
@@ -306,8 +305,7 @@ void motion(int x, int y){
 		float yf = y / 256.0;
 
 		if(xf*xf + yf*yf < 1){
-
-			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 0};
 			// Export that rotation to another function
 			rotate_ctm(old_mouse_pos, cur_mouse_pos);
 			old_mouse_pos = cur_mouse_pos;
