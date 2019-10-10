@@ -41,3 +41,4 @@ mat4 translate(float x, float y, float z);
 mat4 rotate_x(float t);  // t for theta
 mat4 rotate_y(float t);
 mat4 rotate_z(float t);
+mat4 rotate_about_vector(vec4 v, float t);

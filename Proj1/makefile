@@ -7,5 +7,5 @@ initShader.o: initShader.c initShader.h
 	g++ -c initShader.c
 
 matrixlib.o: matrixlib.c matrixlib.h
-	g++ -c matrixlib.c
+	g++ -c matrixlib.c $(LIBS)
 

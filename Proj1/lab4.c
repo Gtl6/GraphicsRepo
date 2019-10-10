@@ -25,14 +25,15 @@
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 #define PI 3.14159265
 
+// Some constants to set
 const float circle_radius = 0.05;
-const int circle_resolution = 8;
-const float coil_space = 0.05;
-const int num_coils = 7;
-const int coil_resolution = 8;
+const int circle_resolution = 16;
+const float coil_space = 0.1;
+const int num_coils = 5;
+const int coil_resolution = 16;
 const float coil_center_radius = 0.2;
 
-// Calculates the number of vertices
+// Just some nice derivations to have on hand, please don't change these
 int CIRCLEVERTCOUNT = 3 * circle_resolution;
 int COILVERTCOUNT = 6 * circle_resolution * coil_resolution;
 int NUMVERTICES = COILVERTCOUNT * num_coils + 2 * CIRCLEVERTCOUNT;
@@ -40,9 +41,13 @@ float CIRCANGLE = 2 * PI / circle_resolution;
 float TUBEANGLE = 2 * PI / coil_resolution;
 float TUBEHEIGHTS = (2 * circle_radius + coil_space) / coil_resolution;
 
+// Some global variables
 GLuint ctm_location;
 mat4 ctm;
-float spring_rotate = 0;
+float spring_rotate = 0.05;
+vec4 old_mouse_pos;
+vec4 release_vector;
+bool clicked;
 
 // Will generate just one circle at a time, because I like making functions and offloading effort instead of actually writing code
 void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
@@ -79,7 +84,7 @@ void generate_one_circle(vec4 *arr, float x, float y, float z, char is_left){
 // Will generate the circles on the ends of the spring
 void generate_circles(vec4 *arr){
 	float x = 0;
-	float y = 0.5 * (coil_space) + 0.5 * (num_coils) * (coil_space + 2 * circle_radius) + circle_radius; // We have our spring centered at the origin, so this is gross
+	float y = 0.5 * (coil_space) + 0.5 * (num_coils - 1) * (coil_space + 2 * circle_radius) + circle_radius; // We have our spring centered at the origin, so this is gross
 	float z = coil_center_radius;
 
 	generate_one_circle(arr, x, y, z, 0);
@@ -147,7 +152,7 @@ void generate_spring(vec4 *arr){
 	}
 
 	// Note num_coils results in int division. This is on purpose (so 5 drops two coils, as would 4, so that's why we need the shifting)
-	start_height -= (num_coils / 2) * coil_height;
+	start_height -= (num_coils / 2) * coil_height + coil_height / 2;
 
 	// To account for the fact we've already populated the array with two circles
 	int circle_offset = 2 * CIRCLEVERTCOUNT;
@@ -181,7 +186,11 @@ void init(void)
     GLuint program = initShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
 
+	// I'm not sure what this does, but it seems to make the ctm thing work
 	ctm_location = glGetUniformLocation(program, "ctm");
+	// Setup ctm as the identity matrix
+	// Cooooome, as you are, as you were, as I waaaant you to be
+	ctm = {{1,0,0,0}, {0,1,0,0},{0,0,1,0},{0,0,0,1}};
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -191,12 +200,6 @@ void init(void)
 	generate_spring(vertices);
 	vec4 colors[NUMVERTICES];
 	generate_colors(colors);
-
-	int i;
-	for(i = 0; i < NUMVERTICES; i++){
-		vec4 thisone = vertices[i];
-		printf("[%.3f, %.3f, %.3f, %.3f]\n", thisone.x, thisone.y, thisone.z, thisone.w);
-	}
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
@@ -224,8 +227,6 @@ void display(void)
 
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
-
-	ctm = rotate_y(spring_rotate);
     
 	glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
 
@@ -241,8 +242,74 @@ void keyboard(unsigned char key, int mousex, int mousey)
     glutPostRedisplay();
 }
 
-void idle(void){
-	spring_rotate += 0.05;
+void mouse(int button, int state, int x, int y){
+	x -= 256;
+	y -= 256;
+	float xf = x / 256.0;
+	float yf = y / 256.0;
+
+	if(button == 3){
+		ctm = matrix_matrix_multiply(scale(1.02, 1.02, 1.02), ctm);
+	}
+	else if(button == 4){
+		float num = 1/ 1.02;
+		ctm = matrix_matrix_multiply(scale(num, num, num), ctm);
+	}
+	else if(button == GLUT_LEFT_BUTTON){
+		if(state == GLUT_DOWN){
+			// Check it's within our circle
+			if(xf*xf + yf*yf < 1){
+				clicked = true;
+				old_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			}
+		}
+		else if(state == GLUT_UP){
+			clicked = false;
+			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			release_vector = vector_sub(old_mouse_pos, cur_mouse_pos);
+		}
+	}
+	glutPostRedisplay();
+}
+
+void idle(){
+	
+}
+
+// rotates the object according to what we got from the mouse
+void rotate_ctm(vec4 v1, vec4 v2){
+	// Fun fact, absolute value is equivalent to magnitude (it's just one-dimensional)
+	float abs1 = magnitude(v1);
+	float abs2 = magnitude(v2);
+	
+	float denom = abs1 * abs2;
+	if(denom != 0){
+		float res = dot_product(v1, v2) / denom;
+		float angle = acos(res);
+
+		if(!isnan(angle)){
+			vec4 theperp = cross_product(v1, v2);
+			ctm = matrix_matrix_multiply(rotate_about_vector(theperp, angle), ctm);
+		}
+	}
+}
+
+// The motion handler for the mouse movement handler
+void motion(int x, int y){	
+	if(clicked){
+		x -= 256;
+		y -= 256;
+		float xf = x / 256.0;
+		float yf = y / 256.0;
+
+		if(xf*xf + yf*yf < 1){
+
+			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			// Export that rotation to another function
+			rotate_ctm(old_mouse_pos, cur_mouse_pos);
+			old_mouse_pos = cur_mouse_pos;
+		}
+	}
 	glutPostRedisplay();
 }
 
@@ -257,7 +324,9 @@ int main(int argc, char **argv)
     init();
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouse);
 	glutIdleFunc(idle);
+	glutMotionFunc(motion);
     glutMainLoop();
 
     return 0;
