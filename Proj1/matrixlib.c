@@ -326,10 +326,10 @@ mat4 rotate_about_vector(vec4 v, float t){
 	float b = magnitude(z_proj);
 	float output = dot_product(yz, z_proj) / (a * b);
 	float theta1 = acos(output);
-	
+
 	if(v.x > 0) theta1 *= -1;
 	
-	if(isnan(theta1)) theta1 = 0;
+	if(isnan(theta1)) theta1 = PI / 2;
 
 	// Now the vector is in the yz plane, rotate up to the positive y vector
 	a = magnitude(v);

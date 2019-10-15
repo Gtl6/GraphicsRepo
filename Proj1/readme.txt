@@ -1,6 +1,9 @@
 Griffin Lynch
 gtl6@pitt.edu
 Submitted 10/10/19
+Resubmitted 10/15/19
+
+Reason for resubmission: Whilst demonstrating my rotating string to my buddy Michael, I realized I couldn't rotate things along the x-axis, which for some reason was almost non-noticeable. This had to do with the divide by 0 issue, so I fixed it by tweaking my matrix library. It works now.
 
 Includes all files for project 1
 	- proj1.c (the source code)

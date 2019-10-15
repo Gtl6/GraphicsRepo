@@ -37,7 +37,7 @@ vec4 vector_sub(vec4 v, vec4 v2){
 
 // Calculate the magnitude of a vector
 float magnitude(vec4 v){
-	return (float)sqrt((double)(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w)); 
+	return (float)sqrt((double)(v.x * v.x + v.y * v.y + v.z * v.z)); 
 }
 
 // Normalize a vector, that is, set its magnitude to 1
@@ -52,7 +52,7 @@ vec4 normalize(vec4 v){
 
 // Performs the dot product operation on two vectors, and returns the result
 float dot_product(vec4 v, vec4 v2){
-	return (v.x * v2.x) + (v.y * v2.y) + (v.z * v2.z) + (v.w * v2.w);
+	return (v.x * v2.x) + (v.y * v2.y) + (v.z * v2.z);
 }
 
 // Performs the cross product operation on two vectors, and returns the result
@@ -316,26 +316,28 @@ mat4 rotate_y(float t){
 // Returns a rotation about any arbitrary vector
 mat4 rotate_about_vector(vec4 v, float t){
 	mat4 ret = {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}};
-	vec4 z_proj = {0, 0, v.z, 1.0};
-	vec4 yz = {0, v.y, v.z, 1.0};
-	vec4 y_proj = {0, v.y, 0, 1.0};
-	vec4 xz = {v.x, 0, v.z, 1.0};
-
+	vec4 xz = {v.x, 0, v.z, 0};
+	vec4 yz = {0, v.y, v.z, 0};
+	vec4 z_proj = {0, 0, 1.0, 0};
+	vec4 y_proj = {0, 1.0, 0, 0};
+	
 	// First figure out the angle to rotate to get it even with the yz plane
-	float a = magnitude(xz);
+	float a = magnitude(yz);
 	float b = magnitude(z_proj);
-	float output = dot_product(xz, z_proj) / (a * b);
+	float output = dot_product(yz, z_proj) / (a * b);
 	float theta1 = acos(output);
 
-	if(isnan(theta1)) return ret;
+	if(v.x > 0) theta1 *= -1;
+	
+	if(isnan(theta1)) theta1 = PI / 2;
 
-	// Then the angle between the yz projection and the y-axis
-	a = magnitude(yz);
+	// Now the vector is in the yz plane, rotate up to the positive y vector
+	a = magnitude(v);
 	b = magnitude(y_proj);
-	output = dot_product(yz, y_proj) / (a * b);
+	output = dot_product(v, y_proj) / (a * b);
 	float theta2 = acos(output);
 
-	if(isnan(theta2)) return ret;
+	if(isnan(theta2)) theta2 = 0;
 
 	// So now we know both of those angles are good, we first rotate to the yz plane
 	ret = matrix_matrix_multiply(rotate_y(theta1), ret);

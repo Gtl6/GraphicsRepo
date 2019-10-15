@@ -27,10 +27,10 @@
 
 // Some constants to set
 // Change them if you like
-const float circle_radius = 0.07;
+const float circle_radius = 0.1;
 const int circle_resolution = 16;
-const float coil_space = 0.15;
-const int num_coils = 5;
+const float coil_space = 0.03;
+const int num_coils = 6;
 const int coil_resolution = 32;
 const float coil_center_radius = 0.25;
 
@@ -168,7 +168,7 @@ void generate_spring(vec4 *arr){
 
 
 float random_col(){
-	return (float)(rand() % 100) / 100;
+	return (float)(rand()%100) / 100;
 }
 
 void generate_colors(vec4 *arr){
@@ -273,10 +273,6 @@ void mouse(int button, int state, int x, int y){
 	glutPostRedisplay();
 }
 
-void idle(){
-	// Do nothing, for now
-}
-
 // rotates the object according to what we got from the mouse
 void rotate_ctm(vec4 v1, vec4 v2){
 	// Fun fact, absolute value is equivalent to magnitude (it's just one-dimensional)
@@ -326,7 +322,6 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
-	glutIdleFunc(idle);
 	glutMotionFunc(motion);
     glutMainLoop();
 
