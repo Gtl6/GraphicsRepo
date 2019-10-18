@@ -1,0 +1,7 @@
+Griffin Lynch
+gtl6@pitt.edu
+9/17/19
+included all necessary files to compile and run the lab, as well as a makefile
+just type make
+edited the code to run with my 512x512 file, other other environment vars (file placement)
+Yes, the program runs without any errors
