@@ -116,6 +116,7 @@ void init(void)
    	generate_colors(RESOLUTION, colors);
 
     move_cone();
+	ctm = rotate_y(0);
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
@@ -160,13 +161,11 @@ void keyboard(unsigned char key, int mousex, int mousey)
 }
 
 void idle(void){
-  /*
   float angle = 0.005;
 
   ctm = matrix_matrix_multiply(rotate_local_y(angle, (vec4){0.25f, 0, 0, 1.0f}), ctm);
 
   glutPostRedisplay();
-  */
 }
 
 int main(int argc, char **argv)
