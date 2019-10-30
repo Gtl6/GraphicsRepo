@@ -80,7 +80,7 @@ void make_xy_face(vec4 com, float width, float height, vec4 *faceLoc, int flip){
   make_face(com, width, height, faceLoc);
 
   if(flip == -1){
-    build_mat = rotate_y(PI);
+    build_mat = rotate_local_y(PI, com);
     rotate_face(faceLoc, build_mat);
   }
 }
@@ -89,11 +89,11 @@ void make_yz_face(vec4 com, float height, float depth, vec4 *faceLoc, int flip){
   make_face(com, depth, height, faceLoc);
 
   if(flip == -1){
-    build_mat = rotate_y(3.0f * PI / 2.0f);
+    build_mat = rotate_local_y(3.0f * PI / 2.0f, com);
     rotate_face(faceLoc, build_mat);
   }
   else{
-    build_mat = rotate_y(PI / 2.0f);
+    build_mat = rotate_local_y(PI / 2.0f, com);
     rotate_face(faceLoc, build_mat);
   }
 }
@@ -102,11 +102,11 @@ void make_xz_face(vec4 com, float width, float depth, vec4 *faceLoc, int flip){
   make_face(com, width, depth, faceLoc);
 
   if(flip == -1){
-    build_mat = rotate_x(3.0f * PI / 2.0f);
+    build_mat = rotate_local_x(3.0f * PI / 2.0f, com);
     rotate_face(faceLoc, build_mat);
   }
   else{
-    build_mat = rotate_x(PI / 2.0f);
+    build_mat = rotate_local_x(PI / 2.0f, com);
     rotate_face(faceLoc, build_mat);
   }
 }
