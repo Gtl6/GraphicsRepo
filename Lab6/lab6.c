@@ -21,6 +21,9 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
+// Controlling the spinning from the top (rather than the bottom)
+int run = 1;
+
 const vec4 RED = {1, 0, 0, 0};
 const vec4 GREEN = {0, 1, 0, 0};
 const vec4 BLUE = {0, 0, 1, 0};
@@ -120,12 +123,12 @@ void make_rectangular_prism(float width, float height, float depth, vec4 com, ve
 
   // Make the front and the back
   vec4 depthvec = {0, 0, depth / 2.0f, 0};
-  make_xy_face(vector_sub(com, depthvec), width, height, prismMem + 0 * num_verts_per_face, 1);
+  make_xy_face(vector_add(com, depthvec), width, height, prismMem + 0 * num_verts_per_face, 1);
   for(i = 0; i < 6; i++){
     colorMem[sliding_i] = RED;
     sliding_i++;
   }
-  make_xy_face(vector_add(com, depthvec), width, height, prismMem + 1 * num_verts_per_face, -1);
+  make_xy_face(vector_sub(com, depthvec), width, height, prismMem + 1 * num_verts_per_face, -1);
   for(i = 0; i < 6; i++){
     colorMem[sliding_i] = PINK;
     sliding_i++;
@@ -219,13 +222,15 @@ void keyboard(unsigned char key, int mousex, int mousey)
 }
 
 void idle(void){
-  float angle = 0.005;
+  if(run == 1){
+    float angle = 0.005;
 
-  twin_cube_ctm = matrix_matrix_multiply(rotate_y(angle), twin_cube_ctm);
-  spinner_cube_ctm = matrix_matrix_multiply(rotate_z(angle), spinner_cube_ctm);
-  flipper_cube_ctm = matrix_matrix_multiply(rotate_x(angle), flipper_cube_ctm);
+    twin_cube_ctm = matrix_matrix_multiply(rotate_y(angle), twin_cube_ctm);
+    spinner_cube_ctm = matrix_matrix_multiply(rotate_local_z(angle, spinner_com), spinner_cube_ctm);
+    flipper_cube_ctm = matrix_matrix_multiply(rotate_local_x(angle, flipper_com), flipper_cube_ctm);
 
-	glutPostRedisplay();
+	   glutPostRedisplay();
+   }
 }
 
 void print_verts(){
@@ -240,8 +245,8 @@ void print_verts(){
 int main(int argc, char **argv)
 {
     // Set up the four cubes
-    make_rectangular_prism(0.5, 0.5, 0.5, {-0.5, 0.5, 0, 0}, vertices + 0 * num_verts_per_rectangular_prism, colors + 0 * num_colors_per_rectangular_prism);
-    make_rectangular_prism(0.5, 0.5, 0.5, {0.5, 0.5, 0, 0}, vertices + 1 * num_verts_per_rectangular_prism, colors + 1 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, {0.5, 0.5, 0, 0}, vertices + 0 * num_verts_per_rectangular_prism, colors + 0 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, {-0.5, 0.5, 0, 0}, vertices + 1 * num_verts_per_rectangular_prism, colors + 1 * num_colors_per_rectangular_prism);
     make_rectangular_prism(0.5, 0.5, 0.5, {-0.5, -0.5, 0, 0}, vertices + 2 * num_verts_per_rectangular_prism, colors + 2 * num_colors_per_rectangular_prism);
     make_rectangular_prism(0.5, 0.5, 0.5, {0.5, -0.5, 0, 0}, vertices + 3 * num_verts_per_rectangular_prism, colors + 3 * num_colors_per_rectangular_prism);
 
