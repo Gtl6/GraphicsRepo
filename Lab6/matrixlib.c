@@ -351,3 +351,23 @@ mat4 rotate_about_vector(vec4 v, float t){
 
 	return ret;
 }
+
+mat4 rotate_local_vector(vec4 local_vec, float t, vec4 com){
+	mat4 ret;
+	ret = translate(-com.x, -com.y, -com.z);
+	ret = matrix_matrix_multiply(rotate_about_vector(local_vec, t), ret);
+	ret = matrix_matrix_multiply(translate(com.x, com.y, com.z), ret);
+	return ret;
+}
+
+mat4 rotate_local_x(float t, vec4 com){
+	return rotate_local_vector({1.0f, 0, 0, 1.0f}, t, com);
+}
+
+mat4 rotate_local_y(float t, vec4 com){
+	return rotate_local_vector({0, 1.0f, 0, 1.0f}, t, com);
+}
+
+mat4 rotate_local_z(float t, vec4 com){
+	return rotate_local_vector({0, 0, 1.0f, 1.0f}, t, com);
+}

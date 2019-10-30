@@ -46,3 +46,7 @@ mat4 rotate_x(float t);  // t for theta
 mat4 rotate_y(float t);
 mat4 rotate_z(float t);
 mat4 rotate_about_vector(vec4 v, float t);
+mat4 rotate_local_x(float t, vec4 com);
+mat4 rotate_local_y(float t, vec4 com);
+mat4 rotate_local_z(float t, vec4 com);
+mat4 rotate_local_vector(vec4 local_vec, float t, vec4 com);
