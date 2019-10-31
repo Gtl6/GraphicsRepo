@@ -52,112 +52,87 @@ mat4 spinner_cube_ctm = rotate_z(0);
 vec4 flipper_com = {0.5, -0.5f, 0, 1.0f};
 mat4 flipper_cube_ctm = rotate_x(0);
 
-// Technically width and height might be any measure
-// However, we're just making an us facing face, and then rotating
-void make_face(vec4 com, float width, float height, vec4 *faceLoc){
-  vec4 topleft = {com.x - width / 2.0f, com.x + height / 2.0f, 0, 1.0f};
-  vec4 topright = {com.x + width / 2.0f, com.x + height / 2.0f, 0, 1.0f};
-  vec4 bottomleft = {com.x - width / 2.0f, com.x - height / 2.0f, 0, 1.0f};
-  vec4 bottomright = {com.x + width / 2.0f, com.x - height / 2.0f, 0, 1.0f};
 
-  faceLoc[0] = bottomright;
-  faceLoc[1] = topright;
-  faceLoc[2] = bottomleft;
-  faceLoc[3] = topleft;
-  faceLoc[4] = bottomleft;
-  faceLoc[5] = topright;
-}
-
-// Yes, I know that passing rotMat is technically redundant since it's just build_mat
-// But that's not what I'm gonna say when I'm debugging this monstrosity later
-void rotate_face(vec4 *faceLoc, mat4 rotMat){
-  int i;
-  for(i = 0; i < num_verts_per_face; i++){
-    faceLoc[i] = matrix_vector_multiply(rotMat, faceLoc[i]);
-  }
-}
-
-// Yeah, the next three functions could probably be combined somehow
-//   This is a nice compromise between readability and brevity, I feel
-void make_xy_face(vec4 com, float width, float height, vec4 *faceLoc, int flip){
-  make_face(com, width, height, faceLoc);
-
-  if(flip == -1){
-    build_mat = rotate_local_y(PI, com);
-    rotate_face(faceLoc, build_mat);
-  }
-}
-
-void make_yz_face(vec4 com, float height, float depth, vec4 *faceLoc, int flip){
-  make_face(com, depth, height, faceLoc);
-
-  if(flip == -1){
-    build_mat = rotate_local_y(3.0f * PI / 2.0f, com);
-    rotate_face(faceLoc, build_mat);
-  }
-  else{
-    build_mat = rotate_local_y(PI / 2.0f, com);
-    rotate_face(faceLoc, build_mat);
-  }
-}
-
-void make_xz_face(vec4 com, float width, float depth, vec4 *faceLoc, int flip){
-  make_face(com, width, depth, faceLoc);
-
-  if(flip == -1){
-    build_mat = rotate_local_x(3.0f * PI / 2.0f, com);
-    rotate_face(faceLoc, build_mat);
-  }
-  else{
-    build_mat = rotate_local_x(PI / 2.0f, com);
-    rotate_face(faceLoc, build_mat);
-  }
-}
 
 // Height along the y, width along the x, depth along the z
 // Center of cube is at the given center of mass vector
 // Write the vertices to prismMem, and the colors to colorMem
-void make_rectangular_prism(float width, float height, float depth, vec4 com, vec4 *prismMem, vec4 *colorMem){
-  int i = 0;
-  int sliding_i = 0;
+void make_rectangular_prism(float width, float height, float depth, vec4 *prismMem, vec4 *colorMem){
+  vec4 rdb = {1, -1, 1, 1};
+  vec4 rub = {1, 1, 1, 1};
+  vec4 ldb = {-1, -1, 1, 1};
+  vec4 lub = {-1, 1, 1, 1};
+  vec4 rdf = {1, -1, -1, 1};
+  vec4 ruf = {1, 1, -1, 1};
+  vec4 ldf = {-1, -1, -1, 1};
+  vec4 luf = {-1, 1, -1, 1};
+  int i;
 
-  // Make the front and the back
-  vec4 depthvec = {0, 0, depth / 2.0f, 0};
-  make_xy_face(vector_add(com, depthvec), width, height, prismMem + 0 * num_verts_per_face, 1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = RED;
-    sliding_i++;
-  }
-  make_xy_face(vector_sub(com, depthvec), width, height, prismMem + 1 * num_verts_per_face, -1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = PINK;
-    sliding_i++;
-  }
+  width /= 2;
+  height /= 2;
+  depth /= 2;
 
-  // Make the right and the left
-  vec4 widthvec = {width / 2.0f, 0, 0, 0};
-  make_yz_face(vector_add(com, widthvec), height, depth, prismMem + 2 * num_verts_per_face, 1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = YELLOW;
-    sliding_i++;
-  }
-  make_yz_face(vector_sub(com, widthvec), height, depth, prismMem + 3 * num_verts_per_face, -1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = CYAN;
-    sliding_i++;
-  }
+  // Front
+  prismMem[0] = rdb;
+  prismMem[1] = rub;
+  prismMem[2] = ldb;
+  prismMem[3] = lub;
+  prismMem[4] = ldb;
+  prismMem[5] = rub;
+  for(i = 0; i < 6; i++) colorMem[i] = RED;
 
-  // Make the top and the bottom
-  vec4 heightvec = {0, height / 2.0f, 0, 0};
-  make_xz_face(vector_add(com, heightvec), width, depth, prismMem + 4 * num_verts_per_face, 1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = BLUE;
-    sliding_i++;
-  }
-  make_xz_face(vector_sub(com, heightvec), width, depth, prismMem + 5 * num_verts_per_face, -1);
-  for(i = 0; i < 6; i++){
-    colorMem[sliding_i] = GREEN;
-    sliding_i++;
+  // Back
+  // Just copied and pasted Front, so that's why the nums are weird
+  prismMem[6] = rdf;
+  prismMem[8] = ruf;
+  prismMem[7] = ldf;
+  prismMem[9] = luf;
+  prismMem[11] = ldf;
+  prismMem[10] = ruf;
+  for(i = 6; i < 12; i++) colorMem[i] = BLUE;
+
+  // Left
+  prismMem[12] = ldb;
+  prismMem[13] = lub;
+  prismMem[14] = ldf;
+  prismMem[15] = luf;
+  prismMem[16] = ldf;
+  prismMem[17] = lub;
+  for(i = 12; i < 18; i++) colorMem[i] = PINK;
+
+  // Right
+  // Ditto to back
+  prismMem[18] = rdb;
+  prismMem[20] = rub;
+  prismMem[19] = rdf;
+  prismMem[21] = ruf;
+  prismMem[23] = rdf;
+  prismMem[22] = rub;
+  for(i = 18; i < 24; i++) colorMem[i] = CYAN;
+
+  // Top
+  prismMem[24] = rub;
+  prismMem[25] = ruf;
+  prismMem[26] = lub;
+  prismMem[27] = luf;
+  prismMem[28] = lub;
+  prismMem[29] = ruf;
+  for(i = 24; i < 30; i++) colorMem[i] = YELLOW;
+
+  // Bottom
+  prismMem[30] = rdb;
+  prismMem[32] = rdf;
+  prismMem[31] = ldb;
+  prismMem[33] = ldf;
+  prismMem[35] = ldb;
+  prismMem[34] = rdf;
+  for(i = 30; i < 36; i++) colorMem[i] = GREEN;
+
+  // Change the dimensions of the given rectangular prism to those specified
+  mat4 changermat = scale(width, height, depth);
+
+  for(i = 0; i < 36; i++){
+    prismMem[i] = matrix_vector_multiply(changermat, prismMem[i]);
   }
 }
 
@@ -242,21 +217,35 @@ void print_verts(){
   }
 }
 
+void place_cube(float x, float y, vec4 *cube){
+  mat4 mover = translate(x, y, 0);
+  int i;
+  for(i = 0; i < 36; i++){
+    cube[i] = matrix_vector_multiply(mover, cube[i]);
+  }
+}
+
 int main(int argc, char **argv)
 {
     // Set up the four cubes
-    make_rectangular_prism(0.5, 0.5, 0.5, {0.5, 0.5, 0, 0}, vertices + 0 * num_verts_per_rectangular_prism, colors + 0 * num_colors_per_rectangular_prism);
-    make_rectangular_prism(0.5, 0.5, 0.5, {-0.5, 0.5, 0, 0}, vertices + 1 * num_verts_per_rectangular_prism, colors + 1 * num_colors_per_rectangular_prism);
-    make_rectangular_prism(0.5, 0.5, 0.5, {-0.5, -0.5, 0, 0}, vertices + 2 * num_verts_per_rectangular_prism, colors + 2 * num_colors_per_rectangular_prism);
-    make_rectangular_prism(0.5, 0.5, 0.5, {0.5, -0.5, 0, 0}, vertices + 3 * num_verts_per_rectangular_prism, colors + 3 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, vertices + 0 * num_verts_per_rectangular_prism, colors + 0 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, vertices + 1 * num_verts_per_rectangular_prism, colors + 1 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, vertices + 2 * num_verts_per_rectangular_prism, colors + 2 * num_colors_per_rectangular_prism);
+    make_rectangular_prism(0.5, 0.5, 0.5, vertices + 3 * num_verts_per_rectangular_prism, colors + 3 * num_colors_per_rectangular_prism);
 
-    print_verts();
+    // Place the cubes
+    place_cube(0.5, 0.5, vertices + 0 * num_verts_per_rectangular_prism);
+    place_cube(-0.5, 0.5, vertices + 1 * num_verts_per_rectangular_prism);
+    place_cube(-0.5, -0.5, vertices + 2 * num_verts_per_rectangular_prism);
+    place_cube(0.5, -0.5, vertices + 3 * num_verts_per_rectangular_prism);
 
+
+    //print_verts();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(512, 512);
     glutInitWindowPosition(100,100);
-    glutCreateWindow("Triangle");
+    glutCreateWindow("Lab 6");
     glewInit();
     init();
     glutDisplayFunc(display);
