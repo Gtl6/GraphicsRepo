@@ -22,7 +22,7 @@
 
 #include "math.h"
 #include "initShader.h"
-#include "matrixlib.h"
+#include "../MatrixLib/matrixlib.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -33,6 +33,7 @@ vec4 vertices[RESOLUTION * 6];
 vec4 colors[RESOLUTION * 6];
 mat4 ctm;
 GLuint ctm_location;
+float angle = 0;
 
 // The cone will be from y = -1 to y = 1
 void generate_vertices(int res, vec4 *arr){
@@ -49,12 +50,12 @@ void generate_vertices(int res, vec4 *arr){
 		float z1 = 0.5f * sinf(chunksize * (i + 1));
 		float x2 = 0.5f * cosf(chunksize * i);
 		float z2 = 0.5f * sinf(chunksize * i);
-		made.x = x1;
-		made.z = z1;
-		arr[index] = made;
-		index++;
 		made.x = x2;
 		made.z = z2;
+		arr[index] = made;
+		index++;
+		made.x = x1;
+		made.z = z1;
 		arr[index] = made;
 		index++;
 
@@ -65,14 +66,14 @@ void generate_vertices(int res, vec4 *arr){
 		arr[index] = made;
 		index++;
 
-		made.x = x2;
+		made.x = x1;
 		made.y = -0.5f;
-		made.z = z2;
+		made.z = z1;
 		arr[index] = made;
 		index++;
 
-		made.x = x1;
-		made.z = z1;
+		made.x = x2;
+		made.z = z2;
 		arr[index] = made;
 		index++;
 	}
@@ -97,7 +98,7 @@ void generate_colors(int res, vec4 *arr){
 
 void move_cone(){
   int i;
-  mat4 movmat = translate(0.25, 0.25, 0);
+  mat4 movmat = translate(0, 0, -2);
   for(i = 0; i < num_vertices; i++){
     vertices[i] = matrix_vector_multiply(movmat, vertices[i]);
   }
@@ -116,7 +117,6 @@ void init(void)
    	generate_colors(RESOLUTION, colors);
 
     move_cone();
-	ctm = rotate_y(0);
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
@@ -161,10 +161,11 @@ void keyboard(unsigned char key, int mousex, int mousey)
 }
 
 void idle(void){
-  float angle = 0.005;
-
-  ctm = matrix_matrix_multiply(rotate_local_y(angle, (vec4){0.25f, 0, 0, 1.0f}), ctm);
-
+	angle += 0.001;
+	// Using each of the below works, but not both at the same time
+	// Not a clue why
+	//ctm = look_at(0.5 * cosf(angle), 0.5, 0.5 * sinf(angle), 0, 0, 0, 0, 1, 0);
+	ctm = perspective(PI / 3, 1, -1, -2);
   glutPostRedisplay();
 }
 
@@ -177,11 +178,6 @@ int main(int argc, char **argv)
     glutCreateWindow("Lab 3 - Cone");
     glewInit();
     init();
-
-    printf("top: [0, 0.5, 0, 1]\n");
-    printf("bottom: [0, -0.5, 0, 1]\n");
-    printf("vertices used: %d\n", RESOLUTION* 6);
-    printf("height of cone: 1\n");
 
 
     glutDisplayFunc(display);

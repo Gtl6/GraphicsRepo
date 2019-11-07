@@ -20,6 +20,9 @@ typedef struct {
 	vec4 w;
 } mat4;
 
+// Just gives you the identity matrix. Nice to have.
+mat4 identity_matrix();
+
 // All basic functions
 void vector_print(vec4 v);
 vec4 scalar_vector_multiply(float s, vec4 v);
@@ -54,3 +57,4 @@ mat4 rotate_local_vector(vec4 local_vec, float t, vec4 com);
 // Camera Functions
 mat4 frustum(float left, float right, float bottom, float top, float near, float far);
 mat4 look_at(float eyex, float eyey, float eyez, float atx, float aty, float atz, float upx, float upy, float upz);
+mat4 perspective(float fovy, float aspect, float near, float far);

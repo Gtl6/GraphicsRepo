@@ -1,6 +1,16 @@
 // Written by Griffin Lynch
 #include "matrixlib.h"
 
+// just a nice thing to have
+mat4 identity_matrix(){
+	mat4 id = {{1, 0, 0, 0},
+					{0, 1, 0, 0},
+					{0, 0, 1, 0},
+					{0, 0, 0, 1}};
+
+	return id;
+}
+
 // Simple Function to print out a 4x1 vector on a screen
 // Note the vector is printed as a row vector, though we consider them to be
 // 	column vectors internally
@@ -361,18 +371,19 @@ mat4 rotate_local_vector(vec4 local_vec, float t, vec4 com){
 }
 
 mat4 rotate_local_x(float t, vec4 com){
-	return rotate_local_vector({1.0f, 0, 0, 1.0f}, t, com);
+	return rotate_local_vector((vec4){1.0f, 0, 0, 1.0f}, t, com);
 }
 
 mat4 rotate_local_y(float t, vec4 com){
-	return rotate_local_vector({0, 1.0f, 0, 1.0f}, t, com);
+	return rotate_local_vector((vec4){0, 1.0f, 0, 1.0f}, t, com);
 }
 
 mat4 rotate_local_z(float t, vec4 com){
-	return rotate_local_vector({0, 0, 1.0f, 1.0f}, t, com);
+	return rotate_local_vector((vec4){0, 0, 1.0f, 1.0f}, t, com);
 }
 
 
+// I don't actually know what this does, to be totally honest with you
 mat4 frustum(float left, float right, float bottom, float top, float near, float far){
 	mat4 returner = {{-2 * near / (right - left), 0, (left + right) / (right - left), 0},
 										{0, -2 * near / (top - bottom), (bottom + top) / (top - bottom), 0},
@@ -383,6 +394,56 @@ mat4 frustum(float left, float right, float bottom, float top, float near, float
 }
 
 
+// Moves the camera to eye_vec, and looks at at_vec with a dutch according to up_vec
 mat4 look_at(float eyex, float eyey, float eyez, float atx, float aty, float atz, float upx, float upy, float upz){
-	
+	vec4 pos = {eyex, eyey, eyez, 0};
+	vec4 at = {atx, aty, atz, 0};
+	vec4 vup = {upx, upy, upz, 0};
+
+	// This will give the camera's normal vector
+	vec4 n = vector_sub(at, pos);
+
+	// This gives the camera's "up" vector
+	float numer = dot_product(vup, n);
+	float denom = dot_product(n, n);
+	if(denom == 0){
+		printf("I'm guessing your eye and at positions were the same. Nice try, bud.\n");
+		return identity_matrix();
+	}
+	float scal = numer / denom;
+	vec4 alphavec = scalar_vector_multiply(scal, n);
+	vec4 v = vector_sub(vup, alphavec);
+
+	// Our third vector, ez pz
+	vec4 u = cross_product(v, n);
+
+	// Now normalize them all
+	u = normalize(u);
+	v = normalize(v);
+	n = normalize(n);
+
+	// This is the rotation matrix
+	mat4 rot = {{u.x, v.x, n.x, 0},
+							{u.y, v.y, n.y, 0},
+							{u.z, v.z, n.z, 0},
+							{0, 0, 0, 1}};
+
+	// The translation matrix that moves the points from the world frame to the camera frame
+	mat4 ttwo = translate(-eyex, -eyey, -eyez);
+
+	mat4 ret = matrix_matrix_multiply(rot, ttwo);
+
+	return ret;
+}
+
+
+// A perspective view matrix
+mat4 perspective(float fovy, float aspect, float near, float far){
+	float cot = cosf(fovy / 2) / sin(fovy / 2);
+	mat4 ret = {{-1 * cot / aspect, 0, 0, 0},
+							{0, -1 * cot, 0, 0},
+							{0, 0, (near + far) / (far - near), -2 * near * far / (far - near)},
+							{0, 0, -1, 0}};
+	ret = transpose(ret);
+	return ret;
 }
