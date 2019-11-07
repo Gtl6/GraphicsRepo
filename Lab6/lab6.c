@@ -200,7 +200,7 @@ void idle(void){
   if(run == 1){
     float angle = 0.005;
 
-    twin_cube_ctm = matrix_matrix_multiply(rotate_y(angle), twin_cube_ctm);
+    twin_cube_ctm = matrix_matrix_multiply(rotate_y(-1 * angle), twin_cube_ctm);
     spinner_cube_ctm = matrix_matrix_multiply(rotate_local_z(angle, spinner_com), spinner_cube_ctm);
     flipper_cube_ctm = matrix_matrix_multiply(rotate_local_x(angle, flipper_com), flipper_cube_ctm);
 
