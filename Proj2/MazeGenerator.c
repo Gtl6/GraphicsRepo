@@ -1,6 +1,17 @@
 // A program to generate a maze
 #include "MazeGenerator.h"
 
+// Prints out the data structure underneath the maze
+void print_gross_maze(int *maze, int width, int height){
+  int i, j;
+  for(i = 0; i < height; i++){
+    for(j = 0; j < width; j++){
+      printf("%d ", maze[i * width + j]);
+    }
+    printf("\n");
+  }
+}
+
 // Prints a representation of the maze to the output console
 void print_maze(int *maze, int width, int height){
   int x;
@@ -151,6 +162,9 @@ void make_maze_r(int *maze, int width, int height, int x, int y){
 
 // Just the initializer for the above recursive function
 void make_maze(int *maze, int width, int height){
+  int i;
+  // Fill our maze with 1's
+  for(i = 0; i < width * height; i++) maze[i] = 1;
   srand(time(0));
   return make_maze_r(maze, width, height, 0, 0);
 }

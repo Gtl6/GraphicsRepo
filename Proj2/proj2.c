@@ -19,6 +19,7 @@
 
 #endif  // __APPLE__
 
+#include <sys/time.h>
 #include "math.h"
 #include "initShader.h"
 #include "matrixlib.h"
@@ -156,7 +157,6 @@ void make_unit_cube(vec4 *prismMem){
 	}
 }
 
-
 // Builds a single pillar at some calculated coordinates
 void make_pillar(int j, int i, vec4 *arr, vec2 *texs){
 	float x = groundOffset + j * (pillarThick + wallLen) + 0.5 * pillarThick;
@@ -224,10 +224,13 @@ void make_vertical_wall(int j, int i, vec4 *arr, vec2 *texs){
 	}
 }
 
+
 // Builds the world
 void generate_vertices(vec4 *arr){
-	int maze[MAZEWIDTH * MAZEHEIGHT];
+  int maze[MAZEWIDTH * MAZEHEIGHT];
 	make_maze(maze, MAZEWIDTH, MAZEHEIGHT);
+
+  print_gross_maze(maze, MAZEWIDTH, MAZEHEIGHT);
 
 	add_ground(arr);
 	int i, j;
@@ -361,18 +364,13 @@ void keyboard(unsigned char key, int mousex, int mousey)
 
 void idle(void){
 	angle += 0.005;
-	//angle = 0;
-	// This works... ish
+
 	float r = groundtoprightx / 2;
 	vec4 eye = {r + r * sin(angle), 10, r + -1 * r * cos(angle)};
 	vec4 at = {groundtoprightx / 2, 0, groundtoprightz / 2};
 	vec4 up = {0, 1, 0};
 	view_ctm = look_at_v(eye, at, up);
 	proj_ctm = perspective(PI / 3, 1, -1, -100);
-
-	// For now I'll stick to this
-	//view_ctm = identity_matrix();
-	//view_ctm = identity_matrix();
 
   glutPostRedisplay();
 }

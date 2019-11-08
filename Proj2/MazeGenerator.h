@@ -5,3 +5,5 @@
 void make_maze(int *maze, int width, int height);
 
 void print_maze(int *maze, int width, int height);
+
+void print_gross_maze(int *maze, int width, int height);
