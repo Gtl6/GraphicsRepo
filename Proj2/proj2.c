@@ -51,7 +51,6 @@ float groundOffset = 4 * wallLen;
 // The total number of verts plus the 6 needed for the ground
 #define num_vertices (vertsPerRectPrism * numWallPlusCols + 6)
 
-
 // Defining our ground to go from (0, 0) to:
 #define groundtoprightx (2 * groundOffset + MAZEWIDTH * (wallLen + pillarThick) + pillarThick)
 #define groundtoprightz (2 * groundOffset + MAZEHEIGHT * (wallLen + pillarThick) + pillarThick)
@@ -71,21 +70,21 @@ vec2 grass_coords[6] = {{0.0, 1.0}, {0.5, 1.0}, {0.5, 0.5}, {0.0, 1.0}, {0.5, 0.
 
 // Create the ground face
 void add_ground(vec4 *arr){
-	vec4 bl = {0, 0, 0, 0};
-	vec4 br = {groundtoprightx, 0, 0, 0};
-	vec4 tl = {0, 0, groundtoprightz, 0};
-	vec4 tr = {groundtoprightx, 0, groundtoprightz, 0};
+	vec4 bl = {0, 0, 0, 1};
+	vec4 br = {groundtoprightx, 0, 0, 1};
+	vec4 tl = {0, 0, groundtoprightz, 1};
+	vec4 tr = {groundtoprightx, 0, groundtoprightz, 1};
 
 	int i;
 	for(int i = 0; i < 6; i++)
 		tex_coords[i] = grass_coords[i];
 
 	arr[0] = bl;
-	arr[1] = br;
-	arr[2] = tr;
+	arr[1] = tr;
+	arr[2] = br;
 	arr[3] = bl;
-	arr[4] = tr;
-	arr[5] = tl;
+	arr[4] = tl;
+	arr[5] = tr;
 }
 
 // Makes a 1x1x1 cube centered at the origin
@@ -230,12 +229,12 @@ void generate_vertices(vec4 *arr){
   int maze[MAZEWIDTH * MAZEHEIGHT];
 	make_maze(maze, MAZEWIDTH, MAZEHEIGHT);
 
-  print_gross_maze(maze, MAZEWIDTH, MAZEHEIGHT);
-
 	add_ground(arr);
+
 	int i, j;
 	// Initialized to 6 cause of the ground plane
 	int arrayOffset = 6;
+
 
 	// This is actually going to be very similar to my print function
 	for(i = 0; i < MAZEHEIGHT; i++){
@@ -264,13 +263,14 @@ void generate_vertices(vec4 *arr){
 		arrayOffset += vertsPerRectPrism;
 	}
 
-	// And now do the bottom row of walls
-	for(j = 0; j < MAZEWIDTH; j++){
+	// And now do the back row of walls
+	for(j = 0; j < MAZEWIDTH + 1; j++){
 		// Build the right pillar and side
 		make_pillar(j, i, arr + arrayOffset, tex_coords + arrayOffset);
 		arrayOffset += vertsPerRectPrism;
-		make_horizontal_wall(j, i, arr + arrayOffset, tex_coords + arrayOffset);
-		arrayOffset += vertsPerRectPrism;
+    if(j < MAZEWIDTH)
+		  make_horizontal_wall(j, i, arr + arrayOffset, tex_coords + arrayOffset);
+    arrayOffset += vertsPerRectPrism;
   }
 
 	// And... in theory it's done
@@ -313,6 +313,8 @@ void init(void)
 		vec4 vertices[num_vertices];
    	generate_vertices(vertices);
 
+    printf("----------\n");
+
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -344,6 +346,8 @@ void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
 
@@ -370,7 +374,7 @@ void idle(void){
 	vec4 at = {groundtoprightx / 2, 0, groundtoprightz / 2};
 	vec4 up = {0, 1, 0};
 	view_ctm = look_at_v(eye, at, up);
-	proj_ctm = perspective(PI / 3, 1, -1, -100);
+	proj_ctm = perspective(PI / 2, 1, -1, -100);
 
   glutPostRedisplay();
 }
@@ -389,6 +393,9 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 	  glutIdleFunc(idle);
+
+
+
     glutMainLoop();
 
     return 0;

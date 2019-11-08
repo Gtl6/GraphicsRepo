@@ -433,7 +433,7 @@ mat4 look_at_v(vec4 eye, vec4 at, vec4 up){
 
 // A perspective view matrix
 mat4 perspective(float fovy, float aspect, float near, float far){
-	float cot = cosf(-1 * fovy / 2) / sin(-1 * fovy / 2);
+	float cot = cosf(-1 * fovy / 2) / sinf(-1 * fovy / 2);
 	mat4 ret = {{-1 * cot / aspect, 0, 0, 0},
 							{0, -1 * cot, 0, 0},
 							{0, 0, (near + far) / (far - near), -2 * near * far / (far - near)},
