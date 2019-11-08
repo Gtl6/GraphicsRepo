@@ -203,9 +203,8 @@ void make_horizontal_wall(int j, int i, vec4 *arr, vec2 *texs){
 	make_wall(arr, texs);
 	mat4 movmat = translate(x, 0.5 * wallHeight, z);
 
-	for(i = 0; i < 36; i++){
+	for(i = 0; i < 36; i++)
 		arr[i] = matrix_vector_multiply(movmat, arr[i]);
-	}
 }
 
 // Builds a vertical wall at some calculated coordinates
@@ -228,6 +227,8 @@ void make_vertical_wall(int j, int i, vec4 *arr, vec2 *texs){
 void generate_vertices(vec4 *arr){
   int maze[MAZEWIDTH * MAZEHEIGHT];
 	make_maze(maze, MAZEWIDTH, MAZEHEIGHT);
+
+  print_maze(maze, MAZEWIDTH, MAZEHEIGHT);
 
 	add_ground(arr);
 
@@ -259,8 +260,8 @@ void generate_vertices(vec4 *arr){
 		// Build the right pillar and side
 		make_pillar(j, i, arr + arrayOffset, tex_coords + arrayOffset);
 		arrayOffset += vertsPerRectPrism;
-		make_vertical_wall(j, i, arr + arrayOffset, tex_coords + arrayOffset);
-		arrayOffset += vertsPerRectPrism;
+    make_vertical_wall(j, i, arr + arrayOffset, tex_coords + arrayOffset);
+    arrayOffset += vertsPerRectPrism;
 	}
 
 	// And now do the back row of walls
@@ -312,8 +313,6 @@ void init(void)
 
 		vec4 vertices[num_vertices];
    	generate_vertices(vertices);
-
-    printf("----------\n");
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
@@ -394,7 +393,7 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
 	  glutIdleFunc(idle);
 
-
+    
 
     glutMainLoop();
 

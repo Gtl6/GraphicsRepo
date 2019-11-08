@@ -22,8 +22,10 @@ void print_maze(int *maze, int width, int height){
   char mid[2 * width + 2];
 
   for(y = 0; y < height; y++){
+    int box;
+
     for(x = 0; x < width; x++){
-      int box = maze[y * width + x];
+      box = maze[y * width + x];
       // build the top row
       top[2 * x] = '+';
       if(box % 2 == 0) top[2 * x + 1] = ' ';
@@ -166,5 +168,7 @@ void make_maze(int *maze, int width, int height){
   // Fill our maze with 1's
   for(i = 0; i < width * height; i++) maze[i] = 1;
   srand(time(0));
-  return make_maze_r(maze, width, height, 0, 0);
+  make_maze_r(maze, width, height, 0, 0);
+  maze[0] *= 2;
+  maze[height * width - width] *= 7;
 }
