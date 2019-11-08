@@ -5,7 +5,6 @@
  *      Author: Thumrongsak Kosiyatrakul
  */
 
-
 #ifdef __APPLE__  // include Mac OS X verions of headers
 
 #include <OpenGL/OpenGL.h>
@@ -22,7 +21,7 @@
 
 #include "math.h"
 #include "initShader.h"
-#include "../MatrixLib/matrixlib.h"
+#include "matrixlib.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -31,8 +30,13 @@
 int num_vertices = RESOLUTION * 6;
 vec4 vertices[RESOLUTION * 6];
 vec4 colors[RESOLUTION * 6];
-mat4 ctm;
-GLuint ctm_location;
+
+// The vshader vars
+mat4 view_ctm;
+mat4 proj_ctm;
+GLuint model_view_location;
+GLuint projection_location;
+
 float angle = 0;
 
 // The cone will be from y = -1 to y = 1
@@ -50,12 +54,12 @@ void generate_vertices(int res, vec4 *arr){
 		float z1 = 0.5f * sinf(chunksize * (i + 1));
 		float x2 = 0.5f * cosf(chunksize * i);
 		float z2 = 0.5f * sinf(chunksize * i);
-		made.x = x2;
-		made.z = z2;
-		arr[index] = made;
-		index++;
 		made.x = x1;
 		made.z = z1;
+		arr[index] = made;
+		index++;
+		made.x = x2;
+		made.z = z2;
 		arr[index] = made;
 		index++;
 
@@ -66,16 +70,24 @@ void generate_vertices(int res, vec4 *arr){
 		arr[index] = made;
 		index++;
 
-		made.x = x1;
-		made.y = -0.5f;
-		made.z = z1;
-		arr[index] = made;
-		index++;
-
 		made.x = x2;
+		made.y = -0.5f;
 		made.z = z2;
 		arr[index] = made;
 		index++;
+
+		made.x = x1;
+		made.z = z1;
+		arr[index] = made;
+		index++;
+	}
+}
+
+void move_cone(vec4 *verts){
+	int i;
+	mat4 mov = translate(0, 0, 0);
+	for(i = 0; i < num_vertices; i++){
+		verts[i] = matrix_vector_multiply(mov, verts[i]);
 	}
 }
 
@@ -88,20 +100,10 @@ void generate_colors(int res, vec4 *arr){
 	int i;
 	for(i = 0; i < res * 6; i++){
 		vec4 col = {random_col(), random_col(), random_col(), 1.0f};
-		arr[i] = col;
-		i++;
-		arr[i] = col;
-		i++;
+		arr[i++] = col;
+		arr[i++] = col;
 		arr[i] = col;
 	}
-}
-
-void move_cone(){
-  int i;
-  mat4 movmat = translate(0, 0, -2);
-  for(i = 0; i < num_vertices; i++){
-    vertices[i] = matrix_vector_multiply(movmat, vertices[i]);
-  }
 }
 
 void init(void)
@@ -116,7 +118,7 @@ void init(void)
    	generate_vertices(RESOLUTION, vertices);
    	generate_colors(RESOLUTION, colors);
 
-    move_cone();
+		move_cone(vertices);
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
@@ -124,6 +126,9 @@ void init(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
+
+		model_view_location = glGetUniformLocation(program,"model_view_matrix");
+		projection_location = glGetUniformLocation(program,"projection_matrix");
 
     GLuint vPosition = glGetAttribLocation(program, "vPosition");
     glEnableVertexAttribArray(vPosition);
@@ -134,6 +139,7 @@ void init(void)
     glVertexAttribPointer(vColor, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *) sizeof(vertices));
 
     glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDepthRange(1,0);
 }
@@ -145,8 +151,8 @@ void display(void)
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
 
-    // Render the Bro Cubes
-	  glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
+	  glUniformMatrix4fv(model_view_location, 1, GL_FALSE, (GLfloat *) &view_ctm);
+		glUniformMatrix4fv(projection_location, 1, GL_FALSE, (GLfloat *) &proj_ctm);
     glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 
     glutSwapBuffers();
@@ -154,18 +160,26 @@ void display(void)
 
 void keyboard(unsigned char key, int mousex, int mousey)
 {
+
     if(key == 'q')
     	exit(0);
 
     glutPostRedisplay();
 }
 
+float aty = -5;
+
 void idle(void){
-	angle += 0.001;
-	// Using each of the below works, but not both at the same time
-	// Not a clue why
-	//ctm = look_at(0.5 * cosf(angle), 0.5, 0.5 * sinf(angle), 0, 0, 0, 0, 1, 0);
-	ctm = perspective(PI / 3, 1, -1, -2);
+	angle += 0.005;
+	//angle = 0;
+	// This works... ish
+	vec4 eye = {2, 0, 0, 0};
+	vec4 at = {0, aty + angle, 0, 0};
+	printf("%f\n", aty + angle);
+	vec4 up = {0, 1, 0, 0};
+	view_ctm = look_at_v(eye, at, up);
+	proj_ctm = perspective(PI / 3, 1, -1, -5);
+
   glutPostRedisplay();
 }
 
@@ -173,12 +187,12 @@ int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+		glEnable(GL_DEPTH_TEST);
     glutInitWindowSize(512, 512);
     glutInitWindowPosition(100,100);
-    glutCreateWindow("Lab 3 - Cone");
+    glutCreateWindow("Testing the new Mat");
     glewInit();
     init();
-
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);

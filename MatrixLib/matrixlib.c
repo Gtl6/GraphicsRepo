@@ -395,51 +395,45 @@ mat4 frustum(float left, float right, float bottom, float top, float near, float
 
 
 // Moves the camera to eye_vec, and looks at at_vec with a dutch according to up_vec
-mat4 look_at(float eyex, float eyey, float eyez, float atx, float aty, float atz, float upx, float upy, float upz){
+mat4 look_at_f(float eyex, float eyey, float eyez, float atx, float aty, float atz, float upx, float upy, float upz){
 	vec4 pos = {eyex, eyey, eyez, 0};
 	vec4 at = {atx, aty, atz, 0};
 	vec4 vup = {upx, upy, upz, 0};
 
-	// This will give the camera's normal vector
-	vec4 n = vector_sub(at, pos);
+	// This will give the camera frame z vector
+	vec4 n = vector_sub(pos, at);
 
-	// This gives the camera's "up" vector
-	float numer = dot_product(vup, n);
-	float denom = dot_product(n, n);
-	if(denom == 0){
-		printf("I'm guessing your eye and at positions were the same. Nice try, bud.\n");
-		return identity_matrix();
-	}
-	float scal = numer / denom;
-	vec4 alphavec = scalar_vector_multiply(scal, n);
-	vec4 v = vector_sub(vup, alphavec);
+	// This gives the camera frame x vector
+	vec4 u = cross_product(vup, n);
 
-	// Our third vector, ez pz
-	vec4 u = cross_product(v, n);
+	// This gives our camera frame y vector
+	vec4 v = cross_product(n, u);
 
 	// Now normalize them all
 	u = normalize(u);
 	v = normalize(v);
 	n = normalize(n);
 
-	// This is the rotation matrix
-	mat4 rot = {{u.x, v.x, n.x, 0},
-							{u.y, v.y, n.y, 0},
-							{u.z, v.z, n.z, 0},
+	// This is the matrix
+	mat4 M = {{u.x, v.x, n.x, eyex},
+							{u.y, v.y, n.y, eyey},
+							{u.z, v.z, n.z, eyez},
 							{0, 0, 0, 1}};
 
 	// The translation matrix that moves the points from the world frame to the camera frame
-	mat4 ttwo = translate(-eyex, -eyey, -eyez);
-
-	mat4 ret = matrix_matrix_multiply(rot, ttwo);
+	mat4 ret = transpose(M);
+	ret = inverse(ret);
 
 	return ret;
 }
 
+mat4 look_at_v(vec4 eye, vec4 at, vec4 up){
+	return look_at_f(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.w);
+}
 
 // A perspective view matrix
 mat4 perspective(float fovy, float aspect, float near, float far){
-	float cot = cosf(fovy / 2) / sin(fovy / 2);
+	float cot = cosf(-1 * fovy / 2) / sin(-1 * fovy / 2);
 	mat4 ret = {{-1 * cot / aspect, 0, 0, 0},
 							{0, -1 * cot, 0, 0},
 							{0, 0, (near + far) / (far - near), -2 * near * far / (far - near)},

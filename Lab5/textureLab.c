@@ -30,7 +30,6 @@ typedef struct
 } vec2;
 
 // Vertices of a square
-
 vec4 vertices[6] =
 {{-0.5, -0.5,  0.0, 1.0},	// bottom left
  { 0.5, -0.5,  0.0, 1.0},	// bottom right
@@ -55,11 +54,11 @@ vec2 tex_coords[6] = {{0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}
 
 void init(void)
 {
-    int width = 512;
-    int height = 512;
+    int width = 800;
+    int height = 800;
     GLubyte my_texels[width][height][3];
 
-    FILE *fp = fopen("cec.data", "r");
+    FILE *fp = fopen("p2texture04.raw", "r");
     fread(my_texels, width * height * 3, 1, fp);
     fclose(fp);
 
