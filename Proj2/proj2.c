@@ -60,7 +60,16 @@ mat4 view_ctm;
 mat4 proj_ctm;
 GLuint model_view_location;
 GLuint projection_location;
+
+// Animation vars
+int maze[MAZEWIDTH * MAZEHEIGHT];
 float angle = 0;
+int phase = 0;
+int spinningOrMoving = 0; // 0 is spinning 1 is moving
+vec4 oldPlace = {0, 0, 0, 0};
+vec4 newPlace = {0, 0, 0, 0};
+float oldAngle = 0;
+float newAngle = 0;
 
 // The texture mapping info
 vec2 tex_coords[num_vertices];
@@ -222,20 +231,15 @@ void make_vertical_wall(int j, int i, vec4 *arr, vec2 *texs){
 	}
 }
 
-
 // Builds the world
 void generate_vertices(vec4 *arr){
-  int maze[MAZEWIDTH * MAZEHEIGHT];
 	make_maze(maze, MAZEWIDTH, MAZEHEIGHT);
-
   print_maze(maze, MAZEWIDTH, MAZEHEIGHT);
-
 	add_ground(arr);
 
 	int i, j;
 	// Initialized to 6 cause of the ground plane
 	int arrayOffset = 6;
-
 
 	// This is actually going to be very similar to my print function
 	for(i = 0; i < MAZEHEIGHT; i++){
@@ -304,6 +308,8 @@ void init(void)
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &param);
 
 		// Other stuff I don't really understand
+  	proj_ctm = perspective(PI / 2, 1, -1, -100);
+
 		GLuint program = initShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
 
@@ -345,8 +351,6 @@ void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
 
@@ -365,15 +369,58 @@ void keyboard(unsigned char key, int mousex, int mousey)
     glutPostRedisplay();
 }
 
-void idle(void){
-	angle += 0.005;
+// Based on angle, determine whether to adjust forward or to rotate
+void update_view(){
 
-	float r = groundtoprightx / 2;
-	vec4 eye = {r + r * sin(angle), 10, r + -1 * r * cos(angle)};
-	vec4 at = {groundtoprightx / 2, 0, groundtoprightz / 2};
-	vec4 up = {0, 1, 0};
-	view_ctm = look_at_v(eye, at, up);
-	proj_ctm = perspective(PI / 2, 1, -1, -100);
+}
+
+void calc_next_move(){
+
+}
+
+vec4 maze_world_convert(vec4 maze_vec){
+  return maze_vec;
+}
+
+void idle(void){
+  // Part 1: The Spinning
+  if(phase == 0){
+	   angle += 0.01;
+
+  	float r = groundtoprightx / 2;
+  	vec4 eye = {r + r * sin(angle), 10, r + -1 * r * cos(angle)};
+  	vec4 at = {groundtoprightx / 2, 0, groundtoprightz / 2};
+  	vec4 up = {0, 1, 0};
+  	view_ctm = look_at_v(eye, at, up);
+
+    if(angle > 4 * PI){
+      angle = 0;
+      phase = 1;
+      spinningOrMoving = 1;
+      oldPlace = (vec4){groundtoprightx, 10, groundtoprightz, 0};
+      newPlace = maze_world_convert((vec4){0, 0, 0, 0});
+    }
+  } // Part 2: Navigate the maze
+  else if(phase == 1){
+    angle += 0.001;
+
+    // If we're out of the maze
+    if(0){
+      angle = 0;
+      phase = 2;
+    }
+    else{
+      // If we've completed the animation, figure out the next one
+      if(angle >= 1){
+        angle = 0;
+        calc_next_move();
+      }
+      else{
+        update_view();
+      }
+    }
+
+  }
 
   glutPostRedisplay();
 }
@@ -392,8 +439,6 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 	  glutIdleFunc(idle);
-
-    
 
     glutMainLoop();
 
