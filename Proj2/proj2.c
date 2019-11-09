@@ -63,7 +63,6 @@ GLuint projection_location;
 
 // Animation vars
 int maze[MAZEWIDTH * MAZEHEIGHT];
-float angle = 0;
 int phase = 0;
 int spinningOrMoving = 0; // 0 is spinning 1 is moving
 vec4 oldPlace = {0, 0, 0, 0};
@@ -374,11 +373,14 @@ void update_view(){
 
 }
 
+// Figure out what to do next
 void calc_next_move(){
 
 }
 
+// Change coordinates from maze indices to world coordinates
 vec4 maze_world_convert(vec4 maze_vec){
+  
   return maze_vec;
 }
 
@@ -405,7 +407,7 @@ void idle(void){
     angle += 0.001;
 
     // If we're out of the maze
-    if(0){
+    if(oldPlace.x == -1){
       angle = 0;
       phase = 2;
     }
