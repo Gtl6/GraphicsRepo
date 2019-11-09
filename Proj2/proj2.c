@@ -64,11 +64,13 @@ GLuint projection_location;
 // Animation vars
 int maze[MAZEWIDTH * MAZEHEIGHT];
 int phase = 0;
+float angle = 0;
 int spinningOrMoving = 0; // 0 is spinning 1 is moving
 vec4 oldPlace = {0, 0, 0, 0};
 vec4 newPlace = {0, 0, 0, 0};
-float oldAngle = 0;
-float newAngle = 0;
+int oldAngle = 0;
+int newAngle = 0;
+int justTurned = 0;
 
 // The texture mapping info
 vec2 tex_coords[num_vertices];
@@ -234,6 +236,7 @@ void make_vertical_wall(int j, int i, vec4 *arr, vec2 *texs){
 void generate_vertices(vec4 *arr){
 	make_maze(maze, MAZEWIDTH, MAZEHEIGHT);
   print_maze(maze, MAZEWIDTH, MAZEHEIGHT);
+  print_gross_maze(maze, MAZEWIDTH, MAZEHEIGHT);
 	add_ground(arr);
 
 	int i, j;
@@ -368,24 +371,133 @@ void keyboard(unsigned char key, int mousex, int mousey)
     glutPostRedisplay();
 }
 
+// Change coordinates from maze indices to world coordinates
+vec4 maze_world_convert(vec4 maze_vec){
+  float normOffset = groundOffset + pillarThick + wallLen/2;
+  maze_vec.x = normOffset + maze_vec.x * (pillarThick + wallLen);
+  maze_vec.y = wallHeight / 2;
+  maze_vec.z = normOffset + maze_vec.z * (pillarThick + wallLen);
+  return maze_vec;
+}
+
+vec4 world_maze_convert(vec4 world_vec){
+  float normOffset = groundOffset + pillarThick + wallLen/2;
+  world_vec.x = (world_vec.x - normOffset) / (pillarThick + wallLen);
+  world_vec.y = wallHeight / 2;
+  world_vec.z = (world_vec.z - normOffset) / (pillarThick + wallLen);
+  return world_vec;
+}
+
+// Figure out the location of a spot directly in front of a given vector
+//    in front of being defined by a given angle
+vec4 derive_forward(vec4 pos, float angle){
+  vec4 dir_vec = {sinf(angle), 0, cosf(angle), 0};
+  return vector_add(pos, dir_vec);
+}
+
 // Based on angle, determine whether to adjust forward or to rotate
 void update_view(){
+  // In the case that we're spinning,
+  if(spinningOrMoving == 0){
+    float change = (newAngle - oldAngle) * PI / 2;
+    //if(change == 3 * PI / 2) change = -PI / 2; // Turning left
+    //if(change == -3 * PI / 2) change = PI / 2; // Turning right
+
+    vec4 eye = oldPlace;
+  	vec4 at = derive_forward(oldPlace, oldAngle * (PI / 2) + angle * change);
+  	vec4 up = {0, 1, 0};
+  	view_ctm = look_at_v(eye, at, up);
+  }
+  // Otherwise, we're moving... duh
+  else{
+    vec4 moveVec = vector_sub(newPlace, oldPlace);
+    vec4 shortened = scalar_vector_multiply(angle, moveVec);
+    vec4 resultant = vector_add(oldPlace, shortened);
+
+    vec4 eye = resultant;
+  	vec4 at = derive_forward(resultant, oldAngle * (PI / 2));
+  	vec4 up = {0, 1, 0};
+  	view_ctm = look_at_v(eye, at, up);
+  }
+}
+
+// Determines which way to go depending on the spun orientation
+void calc_spun(int forward, int left){
+    // Okay, so you're sitting at <oldPlace.x, oldPlace.z> looking at an angle of oldAngle
+    oldPlace = world_maze_convert(oldPlace);
+    int block = maze[MAZEWIDTH * (int)oldPlace.z + (int)oldPlace.x];
+    vector_print(oldPlace);
+    oldPlace = maze_world_convert(oldPlace);
+
+    printf("Block is %d\n", block);
+    printf("And forward is %d\n", forward);
+
+    if(block % left == 0 && justTurned == 0){ // Prefer turning left
+      printf("Turning left!\n");
+      spinningOrMoving = 0; // We're spinning now
+      newAngle = (oldAngle + 1);
+      justTurned = 1;
+      return;
+    } // Else if you can move forward
+    else if(block % forward == 0){
+      // We're Moving now
+      spinningOrMoving = 1;
+      justTurned = 0;
+      switch(forward){
+        case 2: // Forward is backwards
+          newPlace = world_maze_convert(newPlace);
+          newPlace.z = newPlace.z - 1;
+          newPlace = maze_world_convert(newPlace);
+          break;
+        case 3: // Forward is forwards
+          newPlace = world_maze_convert(newPlace);
+          newPlace.z = newPlace.z + 1;
+          newPlace = maze_world_convert(newPlace);
+          break;
+        case 7: // Forward is looking right
+          newPlace = world_maze_convert(newPlace);
+          newPlace.x = newPlace.x - 1;
+          newPlace = maze_world_convert(newPlace);
+          break;
+        case 5: // Otherwise we're looking left
+          newPlace = world_maze_convert(newPlace);
+          newPlace.x = newPlace.x + 1;
+          newPlace = maze_world_convert(newPlace);
+          break;
+      }
+      printf("Walking forwards to:\n");
+      vector_print(newPlace);
+      return;
+    }
+    else{ // Otherwise turn right
+      printf("Turning right!\n");
+      spinningOrMoving = 0; // We're spinning now
+      newAngle = oldAngle - 1;
+      //if(newAngle == 2 * PI) newAngle = 0;
+      justTurned = 1;
+      return;
+    } // Else if you can move forward
 
 }
 
 // Figure out what to do next
 void calc_next_move(){
+  printf("Facing direction: %d\n", oldAngle);
+  if(oldAngle == -1) oldAngle = 3;
+  if(oldAngle == 4) oldAngle = 0;
 
-}
-
-// Change coordinates from maze indices to world coordinates
-vec4 maze_world_convert(vec4 maze_vec){
-  
-  return maze_vec;
+  if(oldAngle == 0) // Looking directly forward
+    return calc_spun(3, 5);
+  else if(oldAngle == 1) // Looking to the left
+    return calc_spun(5, 2);
+  else if(oldAngle == 2) // Looking back
+    return calc_spun(2, 7);
+  else if(oldAngle == 3) // Looking to the right
+    return calc_spun(7, 3);
 }
 
 void idle(void){
-  // Part 1: The Spinning
+  // Part 1: The Spinning works
   if(phase == 0){
 	   angle += 0.01;
 
@@ -399,24 +511,29 @@ void idle(void){
       angle = 0;
       phase = 1;
       spinningOrMoving = 1;
-      oldPlace = (vec4){groundtoprightx, 10, groundtoprightz, 0};
+      oldPlace = (vec4){groundtoprightx / 2, 10, 0, 0};
+      //newPlace = maze_world_convert((vec4){0, 0, 0, 0});
       newPlace = maze_world_convert((vec4){0, 0, 0, 0});
     }
   } // Part 2: Navigate the maze
   else if(phase == 1){
-    angle += 0.001;
+    angle += 0.01;
 
     // If we're out of the maze
-    if(oldPlace.x == -1){
+    vec4 scaledOld = world_maze_convert(oldPlace);
+    if(scaledOld.x == -1){
       angle = 0;
-      phase = 2;
+      newAngle = 1;
     }
     else{
       // If we've completed the animation, figure out the next one
       if(angle >= 1){
         angle = 0;
+        oldPlace = newPlace;
+        oldAngle = newAngle;
+        printf("\nFiguring out the next thing\n");
         calc_next_move();
-      }
+      } // Otherwise, update the view with the animation
       else{
         update_view();
       }
