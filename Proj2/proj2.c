@@ -34,8 +34,8 @@ typedef struct
 } vec2;
 
 // Figuring out how many vectors I'm going to use
-#define MAZEWIDTH 8
-#define MAZEHEIGHT 8
+#define MAZEWIDTH 60
+#define MAZEHEIGHT 60
 #define wallLen 4
 #define wallThick 0.5
 #define wallHeight 4.5
