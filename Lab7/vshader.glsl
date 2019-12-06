@@ -8,6 +8,6 @@ uniform mat4 ctm;
 
 void main()
 {
-	color = vColor;
+	color = vPosition;
 	gl_Position = ctm * vPosition;
 }

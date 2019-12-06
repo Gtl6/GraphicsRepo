@@ -116,7 +116,7 @@ mat4 matrix_add(mat4 m, mat4 m2){
 	m.w.w += m2.w.w;
 
 	return m;
-} 
+}
 
 
 // subtracts m2 from m
@@ -174,7 +174,7 @@ mat4 matrixOfMinor(mat4 a){
 	mat4 m;
 
 	// These lines were written by a python program, lmao
-	// I did write the python program though, so at least give me credit for that	
+	// I did write the python program though, so at least give me credit for that
 	m.x.x = (a.y.y * a.z.z * a.w.w) + (a.z.y * a.w.z * a.y.w) + (a.w.y * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.y) - (a.z.w * a.w.z * a.y.y) - (a.w.w * a.y.z * a.z.y);
 	m.x.y = (a.y.x * a.z.z * a.w.w) + (a.z.x * a.w.z * a.y.w) + (a.w.x * a.y.z * a.z.w) - (a.y.w * a.z.z * a.w.x) - (a.z.w * a.w.z * a.y.x) - (a.w.w * a.y.z * a.z.x);
 	m.x.z = (a.y.x * a.z.y * a.w.w) + (a.z.x * a.w.y * a.y.w) + (a.w.x * a.y.y * a.z.w) - (a.y.w * a.z.y * a.w.x) - (a.z.w * a.w.y * a.y.x) - (a.w.w * a.y.y * a.z.x);
@@ -191,7 +191,7 @@ mat4 matrixOfMinor(mat4 a){
 	m.w.y = (a.x.x * a.y.z * a.z.w) + (a.y.x * a.z.z * a.x.w) + (a.z.x * a.x.z * a.y.w) - (a.x.w * a.y.z * a.z.x) - (a.y.w * a.z.z * a.x.x) - (a.z.w * a.x.z * a.y.x);
 	m.w.z = (a.x.x * a.y.y * a.z.w) + (a.y.x * a.z.y * a.x.w) + (a.z.x * a.x.y * a.y.w) - (a.x.w * a.y.y * a.z.x) - (a.y.w * a.z.y * a.x.x) - (a.z.w * a.x.y * a.y.x);
 	m.w.w = (a.x.x * a.y.y * a.z.z) + (a.y.x * a.z.y * a.x.z) + (a.z.x * a.x.y * a.y.z) - (a.x.z * a.y.y * a.z.x) - (a.y.z * a.z.y * a.x.x) - (a.z.z * a.x.y * a.y.x);
-	
+
 	return m;
 }
 
@@ -259,7 +259,7 @@ mat4 inverse(mat4 m){
 	mat4 mom = matrixOfMinor(m); // Generates the Matrix of minor, which is perhaps trivially obvious given the function name. Oh well.
 	mom = cofactor(mom); // Cofactors the Matrix of minor
 	float det = determinant(m, mom); // Figures out the determinant using the cofactored Matrix of Minor
-	
+
 	// We can apparently assume that det is non-zero
 	if(det == 0) printf("Det is zero! THERE's AN ISSUE HERE!\n");
 	det = 1/det;
@@ -320,7 +320,7 @@ mat4 rotate_about_vector(vec4 v, float t){
 	vec4 yz = {0, v.y, v.z, 0};
 	vec4 z_proj = {0, 0, 1.0, 0};
 	vec4 y_proj = {0, 1.0, 0, 0};
-	
+
 	// First figure out the angle to rotate to get it even with the yz plane
 	float a = magnitude(yz);
 	float b = magnitude(z_proj);
@@ -328,7 +328,7 @@ mat4 rotate_about_vector(vec4 v, float t){
 	float theta1 = acos(output);
 
 	if(v.x > 0) theta1 *= -1;
-	
+
 	if(isnan(theta1)) theta1 = PI / 2;
 
 	// Now the vector is in the yz plane, rotate up to the positive y vector
@@ -351,4 +351,3 @@ mat4 rotate_about_vector(vec4 v, float t){
 
 	return ret;
 }
-
