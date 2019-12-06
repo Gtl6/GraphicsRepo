@@ -433,7 +433,7 @@ mat4 look_at_f(float eyex, float eyey, float eyez, float atx, float aty, float a
 }
 
 mat4 look_at_v(vec4 eye, vec4 at, vec4 up){
-	return look_at_f(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.w);
+	return look_at_f(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.z);
 }
 
 // A perspective view matrix

@@ -102,6 +102,9 @@ float angle;
 vec4 eye;
 vec4 at;
 vec4 up;
+float theta = 0;
+float phi = 0;
+float view_rad = 5;
 
 // Makes a sphere of radius radius (as specified above) at the origin
 void generate_sphere(vec4 *arr){
@@ -191,11 +194,6 @@ void init(void)
     light_position = (vec4){10, 3, 10, 1};
   	projection = perspective(PI / 2, 1, -1, -100);
 
-    eye = (vec4){10, 4, 15, 1};
-  	at = (vec4){10, 0, 10, 1};
-  	up = (vec4){0, 1, 0, 1};
-  	model_view = (mat4)look_at_v(eye, at, up);
-
 		GLuint program = initShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
 
@@ -273,6 +271,12 @@ void display(void)
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
 
+    // Update the camera
+    eye = (vec4){10 + view_rad * cosf(theta), 1 + view_rad * sin(phi), 10 + view_rad * sinf(theta), 1};
+  	at = (vec4){10, 0, 10, 1};
+  	up = (vec4){0, 1, 0, 1};
+  	model_view = (mat4)look_at_v(eye, at, up);
+
     ctm = identity_matrix();
 
     glUniformMatrix4fv(model_view_location, 1, GL_FALSE, (GLfloat *) &model_view);
@@ -311,7 +315,7 @@ void display(void)
     int i;
     for(i = 0; i < 5; i++){
       // Set the location of the ball
-      ctm = translate(10 + i, 0.5, 10);
+      ctm = translate(10 + i * cosf(angle / (i + 1)), 0.5, 10 + i * sinf(angle / (i + 1)));
 
       glUniform1i(isShadow_location, 0);
       glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
@@ -334,14 +338,45 @@ void display(void)
 
 void keyboard(unsigned char key, int mousex, int mousey)
 {
-    if(key == 'q')
+    if(key == 'x')
     	exit(0);
+      
+    if(key == 'w'){
+      if(phi < (PI / 2 - PI / 8)){
+        phi += 1 / (5 * 2 * PI);
+      }
+    }
+
+    if(key == 's'){
+      if(phi > 0){
+        phi -= 1 / (5 * 2 * PI);
+      }
+    }
+
+    if(key == 'd'){
+      theta = (theta + 1 / (5 * 2 * PI));
+      if(theta > 2 * PI) theta -= 2 * PI;
+    }
+
+    if(key == 'a'){
+      theta = (theta - 1 / (5 * 2 * PI));
+      if(theta < 0) theta += 2 * PI;
+    }
+
+    if(key == 'q'){
+      if(view_rad > 2) view_rad -= 0.2;
+    }
+
+    if(key == 'e'){
+      if(view_rad < 10) view_rad += 0.2;
+    }
 
     glutPostRedisplay();
 }
 
 // Tick handler
 void idle(void){
+  angle += 1 / (5 * 2 * PI);
   glutPostRedisplay();
 }
 

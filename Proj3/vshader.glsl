@@ -38,8 +38,8 @@ void main()
 		(attenuation_quadratic * distance * distance));
 
 		// Setting the actual variables to be passed to the renderer
-		//color = ambient + (attenuation * (diffuse + specular));
-		color = normalize(vNormal);
+		color = ambient + (attenuation * (diffuse + specular));
+		//color = normalize(vNormal);
 		gl_Position = projection * model_view * ctm * vPosition;
 	}
 }
