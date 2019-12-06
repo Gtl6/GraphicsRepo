@@ -198,7 +198,7 @@ void init(void)
     glUseProgram(program);
 
     // I really don't have any idea what to set these to
-    attenuation_constant = 0;
+    attenuation_constant = 1;
     attenuation_linear = 0.1;
     attenuation_quadratic = 0.1;
 
@@ -340,7 +340,7 @@ void keyboard(unsigned char key, int mousex, int mousey)
 {
     if(key == 'x')
     	exit(0);
-      
+
     if(key == 'w'){
       if(phi < (PI / 2 - PI / 8)){
         phi += 1 / (5 * 2 * PI);
@@ -369,6 +369,30 @@ void keyboard(unsigned char key, int mousex, int mousey)
 
     if(key == 'e'){
       if(view_rad < 10) view_rad += 0.2;
+    }
+
+    if(key == 'i'){
+      if(light_position.z < 20) light_position.z += 0.2;
+    }
+
+    if(key == 'k'){
+      if(light_position.z > 0) light_position.z -= 0.2;
+    }
+
+    if(key == 'j'){
+      if(light_position.x < 20) light_position.x += 0.2;
+    }
+
+    if(key == 'l'){
+      if(light_position.x > 0) light_position.x -= 0.2;
+    }
+
+    if(key == 'u'){
+      if(light_position.y < 20) light_position.y += 0.2;
+    }
+
+    if(key == 'o'){
+      if(light_position.y > 0) light_position.y -= 0.2;
     }
 
     glutPostRedisplay();
