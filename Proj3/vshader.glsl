@@ -13,6 +13,8 @@ vec4 ambient, diffuse, specular, calcNorm;
 
 void main()
 {
+	vec4 act_pos = ctm * vPosition;
+
 	if(isShadow == 1){
 		color = vec4(0, 0, 0, 1);
 		gl_Position = ctm * vPosition;
@@ -23,13 +25,14 @@ void main()
 	}
 	else{
 		ambient = ambient_product;
-		vec4 N = normalize(projection * model_view * vNormal);
-		vec4 L_temp = projection * model_view * (light_position - vPosition);
+
+		vec4 N = normalize(vNormal);
+		vec4 L_temp = (light_position - act_pos);
 		vec4 L = normalize(L_temp);
 		diffuse = max(dot(L,N), 0.0) * diffuse_product;
 
 		vec4 eye_point = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 V = normalize(eye_point - (projection * model_view * vPosition));
+		vec4 V = normalize(eye_point - (act_pos));
 		vec4 H = normalize(L + V);
 		specular = pow(max(dot(N, H), 0.0), shininess) * specular_product;
 
@@ -38,8 +41,9 @@ void main()
 		(attenuation_quadratic * distance * distance));
 
 		// Setting the actual variables to be passed to the renderer
-		color = ambient + (attenuation * (diffuse + specular));
-		//color = normalize(vNormal);
-		gl_Position = projection * model_view * ctm * vPosition;
+		color = ambient + (attenuation * (diffuse + specular * 50));
+		// color = ambient + specular * 10000;
+		// color = normalize(vNormal);
+		gl_Position = projection * model_view * act_pos;
 	}
 }

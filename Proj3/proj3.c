@@ -63,11 +63,11 @@ material ball_materials[5] = {
 
 // Need materials for the other stuff too
 material table_material = {{0.1, 0.5, 0.0, 1.0}, {0.0, 1.0, 0.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, 10};
-material light_material = {{1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, 10};
+material light_material = {{10, 10, 10, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, 10};
 
 // Properties of our point light
 // Position is defined below
-vec4 light_ambient = {0.5, 0.5, 0.5, 1.0};
+vec4 light_ambient = {0.2, 0.2, 0.2, 1.0};
 vec4 light_diffuse = {1, 1, 1, 1};
 vec4 light_specular = {1, 1, 1, 1};
 
@@ -102,9 +102,10 @@ float angle;
 vec4 eye;
 vec4 at;
 vec4 up;
-float theta = 0;
+float theta = PI / 2;
 float phi = 0;
 float view_rad = 5;
+int animating = 0;
 
 // Makes a sphere of radius radius (as specified above) at the origin
 void generate_sphere(vec4 *arr){
@@ -198,9 +199,9 @@ void init(void)
     glUseProgram(program);
 
     // I really don't have any idea what to set these to
-    attenuation_constant = 1;
-    attenuation_linear = 0.1;
-    attenuation_quadratic = 0.1;
+    attenuation_constant = 0.12;
+    attenuation_linear = 0.15;
+    attenuation_quadratic = 0.05;
 
     float distance = 2;
     float attenuation = 1/(attenuation_constant + (attenuation_linear * distance) +
@@ -249,7 +250,7 @@ void init(void)
 
     glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-    glClearColor(0.5, 0.1, 0.0, 1.0);
+    glClearColor(0, 0, 0.0, 1.0);
     glDepthRange(1,0);
 }
 
@@ -300,6 +301,8 @@ void display(void)
     ctm = matrix_matrix_multiply(ctm, scale(0.2, 0.2, 0.2));
 
     // Draw the light
+    vector_print(light_position);
+
     glUniform1i(isShadow_location, 0);
     glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
     ambient_product = product(light_ambient, light_material.reflect_ambient);
@@ -333,6 +336,7 @@ void display(void)
       glDrawArrays(GL_TRIANGLES, VERTS_PER_RECTANGLE, VERTS_PER_SPHERE);
     }
 
+
     glutSwapBuffers();
 }
 
@@ -354,13 +358,13 @@ void keyboard(unsigned char key, int mousex, int mousey)
     }
 
     if(key == 'd'){
-      theta = (theta + 1 / (5 * 2 * PI));
-      if(theta > 2 * PI) theta -= 2 * PI;
+      theta = (theta - 1 / (5 * 2 * PI));
+      if(theta < 0) theta += 2 * PI;
     }
 
     if(key == 'a'){
-      theta = (theta - 1 / (5 * 2 * PI));
-      if(theta < 0) theta += 2 * PI;
+      theta = (theta + 1 / (5 * 2 * PI));
+      if(theta > 2 * PI) theta -= 2 * PI;
     }
 
     if(key == 'q'){
@@ -372,19 +376,19 @@ void keyboard(unsigned char key, int mousex, int mousey)
     }
 
     if(key == 'i'){
-      if(light_position.z < 20) light_position.z += 0.2;
-    }
-
-    if(key == 'k'){
       if(light_position.z > 0) light_position.z -= 0.2;
     }
 
+    if(key == 'k'){
+      if(light_position.z < 20) light_position.z += 0.2;
+    }
+
     if(key == 'j'){
-      if(light_position.x < 20) light_position.x += 0.2;
+      if(light_position.x > 0) light_position.x -= 0.2;
     }
 
     if(key == 'l'){
-      if(light_position.x > 0) light_position.x -= 0.2;
+      if(light_position.x < 20) light_position.x += 0.2;
     }
 
     if(key == 'u'){
@@ -395,13 +399,20 @@ void keyboard(unsigned char key, int mousex, int mousey)
       if(light_position.y > 0) light_position.y -= 0.2;
     }
 
+    if(key == ' '){
+      animating += 1;
+      animating %= 2;
+    }
+
     glutPostRedisplay();
 }
 
 // Tick handler
 void idle(void){
-  angle += 1 / (5 * 2 * PI);
-  glutPostRedisplay();
+  if(animating){
+    angle += 1 / (5 * 2 * PI);
+    glutPostRedisplay();
+  }
 }
 
 

@@ -1,8 +1,9 @@
 Griffin Lynch
 gtl6@pitt.edu
-Submitted 11/8/2019
-Resubmitted 11/9/2019 1 am
+submitted: 12/6/19
 
-To run, just go ahead and give it a 'make', and then a ./proj2
+To build, just type make.
 
-Reason for resubmission: Got it working. Was just a few tweaks.
+Controls: rotate the viewport with wasd. move the light with ijkl. Zoom in and out with q and e, move the light up and down with u and o. Press space to begin the animation, and you can stop and start at will. Also, for posterity's sake - based on a tip from a friend in class, updated the surface of the lightbub to reflect diffuse light strongly (giving its brightness).
+
+
