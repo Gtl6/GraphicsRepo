@@ -36,6 +36,13 @@
 // The verts for our nice cubie
 #define num_vertices 27 * VERTS_PER_CUBIE
 
+int clicked = 0;
+vec4 old_mouse_pos;
+vec4 release_vector;
+
+float near = 0.15;
+float far = 0.17;
+
 // We'll pass this to our draw function to tell it which colors to use
 typedef struct {
   int GREEN;
@@ -67,26 +74,24 @@ typedef enum{
 } faces;
 
 // Used as a way to make the get_point function cleaner
-void easy_update_vecVal(faces face, faces expected_one, faces expected_other int one_or_other float *placer){
-  float near = 0.1;
-  float far = 0.11;
+void easy_update_vecVal(faces face, faces expected_one, faces expected_other, int one_or_other, float *placer){
   int err = 0;
   if(one_or_other == 0){
     if(face == expected_one){
-      *placer = -far;
+      *placer = -1 * far;
     } else if (face == expected_other) {
       err = 1;
     } else {
-      *placer = -near;
+      *placer = -1 * near;
     }
   }
   else if(one_or_other == 1){
     if(face == expected_other){
-      result.z = far;
+      *placer = far;
     } else if (face == expected_one) {
       err = 1;
     } else {
-      result.z = near;
+      *placer = near;
     }
   }
 
@@ -107,6 +112,7 @@ vec4 get_point(int left_right, int bottom_top, int back_front, faces face){
   return result;
 }
 
+// A very long, repetitive function that sticks a cubie into memory (including the colors)
 void generate_cubie(vec4 *vertices, vec4 *colors){
   // Back (our side) first
   vertices[0] = get_point(0, 0, 0, BACK);
@@ -120,156 +126,156 @@ void generate_cubie(vec4 *vertices, vec4 *colors){
   vertices[7] = get_point(0, 0, 1, FRONT);
   vertices[8] = get_point(0, 1, 1, FRONT);
   vertices[9] = get_point(0, 1, 1, FRONT);
-  vertices[10] = get_points(1, 1, 1, FRONT);
-  vertices[11] = get_points(1, 0, 1, FRONT);
+  vertices[10] = get_point(1, 1, 1, FRONT);
+  vertices[11] = get_point(1, 0, 1, FRONT);
   // Now left
-  vertices[12] = get_points(0, 0, 0, LEFT);
-  vertices[13] = get_points(0, 0, 1, LEFT);
-  vertices[14] = get_points(0, 1, 0, LEFT);
-  vertices[15] = get_points(0, 0, 0, LEFT);
-  vertices[16] = get_points(0, 1, 0, LEFT);
-  vertices[17] = get_points(0, 0, 1, LEFT);
+  vertices[12] = get_point(0, 0, 1, LEFT);
+  vertices[13] = get_point(0, 0, 0, LEFT);
+  vertices[14] = get_point(0, 1, 0, LEFT);
+  vertices[15] = get_point(0, 0, 1, LEFT);
+  vertices[16] = get_point(0, 1, 0, LEFT);
+  vertices[17] = get_point(0, 1, 1, LEFT);
   // And right
-  vertices[18] = get_points(1, 0, 0, RIGHT);
-  vertices[19] = get_points(1, 0, 1, RIGHT);
-  vertices[20] = get_points(1, 1, 1, RIGHT);
-  vertices[21] = get_points(1, 0, 0, RIGHT);
-  vertices[22] = get_points(1, 1, 1, RIGHT);
-  vertices[23] = get_points(1, 1, 1, RIGHT);
+  vertices[18] = get_point(1, 0, 0, RIGHT);
+  vertices[19] = get_point(1, 0, 1, RIGHT);
+  vertices[20] = get_point(1, 1, 1, RIGHT);
+  vertices[21] = get_point(1, 0, 0, RIGHT);
+  vertices[22] = get_point(1, 1, 1, RIGHT);
+  vertices[23] = get_point(1, 1, 0, RIGHT);
   // Bottom
-  vertices[24] = get_points(0, 0, 0, BOTTOM);
-  vertices[25] = get_points(1, 0, 1, BOTTOM);
-  vertices[26] = get_points(1, 0, 0, BOTTOM);
-  vertices[27] = get_points(0, 0, 0, BOTTOM);
-  vertices[28] = get_points(0, 0, 1, BOTTOM);
-  vertices[29] = get_points(1, 0, 1, BOTTOM);
+  vertices[24] = get_point(0, 0, 0, BOTTOM);
+  vertices[25] = get_point(1, 0, 1, BOTTOM);
+  vertices[26] = get_point(1, 0, 0, BOTTOM);
+  vertices[27] = get_point(0, 0, 0, BOTTOM);
+  vertices[28] = get_point(0, 0, 1, BOTTOM);
+  vertices[29] = get_point(1, 0, 1, BOTTOM);
   // Top
-  vertices[30] = get_points(0, 1, 0, TOP);
-  vertices[31] = get_points(1, 1, 0, TOP);
-  vertices[32] = get_points(1, 1, 1, TOP);
-  vertices[33] = get_points(0, 1, 0, TOP);
-  vertices[34] = get_points(1, 1, 1, TOP);
-  vertices[35] = get_points(0, 1, 1, TOP);
+  vertices[30] = get_point(0, 1, 0, TOP);
+  vertices[31] = get_point(1, 1, 0, TOP);
+  vertices[32] = get_point(1, 1, 1, TOP);
+  vertices[33] = get_point(0, 1, 0, TOP);
+  vertices[34] = get_point(1, 1, 1, TOP);
+  vertices[35] = get_point(0, 1, 1, TOP);
   // Now comes the tricky part - the angled surfaces
   // Start off with the one above the back
-  vertices[36] = get_points(0, 1, 0, BACK);
-  vertices[37] = get_points(1, 1, 0, BACK);
-  vertices[38] = get_points(1, 1, 0, TOP);
-  vertices[39] = get_points(0, 1, 0, BACK);
-  vertices[40] = get_points(1, 1, 0, TOP);
-  vertices[41] = get_points(0, 1, 0, TOP);
+  vertices[36] = get_point(0, 1, 0, BACK);
+  vertices[37] = get_point(1, 1, 0, BACK);
+  vertices[38] = get_point(1, 1, 0, TOP);
+  vertices[39] = get_point(0, 1, 0, BACK);
+  vertices[40] = get_point(1, 1, 0, TOP);
+  vertices[41] = get_point(0, 1, 0, TOP);
   // Follow it forward to the one behind the top
-  vertices[42] = get_points(0, 1, 1, TOP);
-  vertices[43] = get_points(1, 1, 1, TOP);
-  vertices[44] = get_points(1, 1, 1, FRONT);
-  vertices[45] = get_points(0, 1, 1, TOP);
-  vertices[46] = get_points(1, 1, 1, FRONT);
-  vertices[47] = get_points(0, 1, 1, FRONT);
+  vertices[42] = get_point(0, 1, 1, TOP);
+  vertices[43] = get_point(1, 1, 1, TOP);
+  vertices[44] = get_point(1, 1, 1, FRONT);
+  vertices[45] = get_point(0, 1, 1, TOP);
+  vertices[46] = get_point(1, 1, 1, FRONT);
+  vertices[47] = get_point(0, 1, 1, FRONT);
   // Keep wrapping around to front bottom
-  vertices[48] = get_points(0, 0, 1, FRONT);
-  vertices[49] = get_points(1, 0, 1, FRONT);
-  vertices[50] = get_points(1, 0, 1, BOTTOM);
-  vertices[51] = get_points(0, 0, 1, FRONT);
-  vertices[52] = get_points(1, 0, 1, BOTTOM);
-  vertices[53] = get_points(0, 0, 1, BOTTOM);
+  vertices[48] = get_point(0, 0, 1, FRONT);
+  vertices[49] = get_point(1, 0, 1, FRONT);
+  vertices[50] = get_point(1, 0, 1, BOTTOM);
+  vertices[51] = get_point(0, 0, 1, FRONT);
+  vertices[52] = get_point(1, 0, 1, BOTTOM);
+  vertices[53] = get_point(0, 0, 1, BOTTOM);
   // Now the bottom and back ones
-  vertices[54] = get_points(0, 0, 0, BOTTOM);
-  vertices[55] = get_points(1, 0, 0, BOTTOM);
-  vertices[56] = get_points(1, 0, 0, BACK);
-  vertices[57] = get_points(0, 0, 0, BOTTOM);
-  vertices[58] = get_points(1, 0, 0, BACK);
-  vertices[59] = get_points(0, 0, 0, BACK);
+  vertices[54] = get_point(0, 0, 0, BOTTOM);
+  vertices[55] = get_point(1, 0, 0, BOTTOM);
+  vertices[56] = get_point(1, 0, 0, BACK);
+  vertices[57] = get_point(0, 0, 0, BOTTOM);
+  vertices[58] = get_point(1, 0, 0, BACK);
+  vertices[59] = get_point(0, 0, 0, BACK);
   //Now the top right one
-  vertices[60] = get_points(1, 1, 0, RIGHT);
-  vertices[61] = get_points(1, 1, 1, RIGHT);
-  vertices[62] = get_points(1, 1, 1, TOP);
-  vertices[63] = get_points(1, 1, 0, RIGHT);
-  vertices[64] = get_points(1, 1, 1, TOP);
-  vertices[65] = get_points(1, 1, 0, TOP);
+  vertices[60] = get_point(1, 1, 0, RIGHT);
+  vertices[61] = get_point(1, 1, 1, RIGHT);
+  vertices[62] = get_point(1, 1, 1, TOP);
+  vertices[63] = get_point(1, 1, 0, RIGHT);
+  vertices[64] = get_point(1, 1, 1, TOP);
+  vertices[65] = get_point(1, 1, 0, TOP);
   // Top left
-  vertices[66] = get_points(0, 1, 1, LEFT);
-  vertices[67] = get_points(0, 1, 0, LEFT);
-  vertices[68] = get_points(0, 1, 0, TOP);
-  vertices[69] = get_points(0, 1, 1, LEFT);
-  vertices[70] = get_points(0, 1, 0, TOP);
-  vertices[71] = get_points(0, 1, 1, TOP);
+  vertices[66] = get_point(0, 1, 1, LEFT);
+  vertices[67] = get_point(0, 1, 0, LEFT);
+  vertices[68] = get_point(0, 1, 0, TOP);
+  vertices[69] = get_point(0, 1, 1, LEFT);
+  vertices[70] = get_point(0, 1, 0, TOP);
+  vertices[71] = get_point(0, 1, 1, TOP);
   // bottom right
-  vertices[72] = get_points(1, 0, 0, BOTTOM);
-  vertices[73] = get_points(1, 0, 1, BOTTOM);
-  vertices[74] = get_points(1, 0, 1, RIGHT);
-  vertices[75] = get_points(1, 0, 0, BOTTOM);
-  vertices[76] = get_points(1, 0, 1, RIGHT);
-  vertices[77] = get_points(1, 0, 0, RIGHT);
+  vertices[72] = get_point(1, 0, 0, BOTTOM);
+  vertices[73] = get_point(1, 0, 1, BOTTOM);
+  vertices[74] = get_point(1, 0, 1, RIGHT);
+  vertices[75] = get_point(1, 0, 0, BOTTOM);
+  vertices[76] = get_point(1, 0, 1, RIGHT);
+  vertices[77] = get_point(1, 0, 0, RIGHT);
   // bottom left
-  vertices[78] = get_points(0, 0, 1, BOTTOM);
-  vertices[79] = get_points(0, 0, 0, BOTTOM);
-  vertices[80] = get_points(0, 0, 0, LEFT);
-  vertices[81] = get_points(0, 0, 1, BOTTOM);
-  vertices[82] = get_points(0, 0, 0, LEFT);
-  vertices[83] = get_points(0, 0, 1, LEFT);
+  vertices[78] = get_point(0, 0, 1, BOTTOM);
+  vertices[79] = get_point(0, 0, 0, BOTTOM);
+  vertices[80] = get_point(0, 0, 0, LEFT);
+  vertices[81] = get_point(0, 0, 1, BOTTOM);
+  vertices[82] = get_point(0, 0, 0, LEFT);
+  vertices[83] = get_point(0, 0, 1, LEFT);
   // front right
-  vertices[84] = get_points(1, 0, 1, RIGHT);
-  vertices[85] = get_points(1, 0, 1, FRONT);
-  vertices[86] = get_points(1, 1, 1, FRONT);
-  vertices[87] = get_points(1, 1, 1, RIGHT);
-  vertices[88] = get_points(1, 1, 1, FRONT);
-  vertices[89] = get_points(1, 1, 1, RIGHT);
+  vertices[84] = get_point(1, 0, 1, RIGHT);
+  vertices[85] = get_point(1, 0, 1, FRONT);
+  vertices[86] = get_point(1, 1, 1, FRONT);
+  vertices[87] = get_point(1, 0, 1, RIGHT);
+  vertices[88] = get_point(1, 1, 1, FRONT);
+  vertices[89] = get_point(1, 1, 1, RIGHT);
   // front left
-  vertices[90] = get_points(0, 0, 1, FRONT);
-  vertices[91] = get_points(0, 0, 1, LEFT);
-  vertices[92] = get_points(0, 1, 1, LEFT);
-  vertices[93] = get_points(0, 0, 1, FRONT);
-  vertices[94] = get_points(0, 1, 1, LEFT);
-  vertices[95] = get_points(0, 1, 1, FRONT);
+  vertices[90] = get_point(0, 0, 1, FRONT);
+  vertices[91] = get_point(0, 0, 1, LEFT);
+  vertices[92] = get_point(0, 1, 1, LEFT);
+  vertices[93] = get_point(0, 0, 1, FRONT);
+  vertices[94] = get_point(0, 1, 1, LEFT);
+  vertices[95] = get_point(0, 1, 1, FRONT);
   // back right
-  vertices[96] = get_points(1, 0, 0, BACK);
-  vertices[97] = get_points(1, 0, 0, RIGHT);
-  vertices[98] = get_points(1, 1, 0, RIGHT);
-  vertices[99] = get_points(1, 1, 0, BACK);
-  vertices[100] = get_points(1, 1, 0, RIGHT);
-  vertices[101] = get_points(1, 1, 0, BACK);
+  vertices[96] = get_point(1, 0, 0, BACK);
+  vertices[97] = get_point(1, 0, 0, RIGHT);
+  vertices[98] = get_point(1, 1, 0, RIGHT);
+  vertices[99] = get_point(1, 0, 0, BACK);
+  vertices[100] = get_point(1, 1, 0, RIGHT);
+  vertices[101] = get_point(1, 1, 0, BACK);
   // back left
-  vertices[102] = get_points(0, 0, 0, LEFT);
-  vertices[103] = get_points(0, 0, 0, BACK);
-  vertices[104] = get_points(0, 1, 0, BACK);
-  vertices[105] = get_points(0, 0, 0, LEFT);
-  vertices[106] = get_points(0, 1, 0, BACK);
-  vertices[107] = get_points(0, 1, 0, LEFT);
+  vertices[102] = get_point(0, 0, 0, LEFT);
+  vertices[103] = get_point(0, 0, 0, BACK);
+  vertices[104] = get_point(0, 1, 0, BACK);
+  vertices[105] = get_point(0, 0, 0, LEFT);
+  vertices[106] = get_point(0, 1, 0, BACK);
+  vertices[107] = get_point(0, 1, 0, LEFT);
   // Close to done! Let's not forget the triangles!
   // These are actually going to be pretty easy, cause it's the same coord
   // Start w/ top right, on the back
-  vertices[108] = get_points(1, 1, 0, BACK);
-  vertices[109] = get_points(1, 1, 0, RIGHT);
-  vertices[110] = get_points(1, 1, 0, TOP);
+  vertices[108] = get_point(1, 1, 0, BACK);
+  vertices[109] = get_point(1, 1, 0, RIGHT);
+  vertices[110] = get_point(1, 1, 0, TOP);
   // Top left back
-  vertices[111] = get_points(0, 1, 0, LEFT);
-  vertices[112] = get_points(0, 1, 0, BACK);
-  vertices[113] = get_points(0, 1, 0, TOP);
+  vertices[111] = get_point(0, 1, 0, LEFT);
+  vertices[112] = get_point(0, 1, 0, BACK);
+  vertices[113] = get_point(0, 1, 0, TOP);
   // Top right front
-  vertices[114] = get_points(1, 1, 1, FRONT);
-  vertices[115] = get_points(1, 1, 1, TOP);
-  vertices[116] = get_points(1, 1, 1, RIGHT);
+  vertices[114] = get_point(1, 1, 1, FRONT);
+  vertices[115] = get_point(1, 1, 1, TOP);
+  vertices[116] = get_point(1, 1, 1, RIGHT);
   // Top left front
-  vertices[117] = get_points(0, 1, 1, FRONT);
-  vertices[118] = get_points(0, 1, 1, TOP);
-  vertices[119] = get_points(0, 1, 1, LEFT);
+  vertices[117] = get_point(0, 1, 1, FRONT);
+  vertices[118] = get_point(0, 1, 1, LEFT);
+  vertices[119] = get_point(0, 1, 1, TOP);
   // Halfway done. Keep the faith, bud
   // bottom left back
-  vertices[120] = get_points(0, 0, 0, BACK);
-  vertices[121] = get_points(0, 0, 0, LEFT);
-  vertices[122] = get_points(0, 0, 0, BOTTOM);
+  vertices[120] = get_point(0, 0, 0, BACK);
+  vertices[121] = get_point(0, 0, 0, LEFT);
+  vertices[122] = get_point(0, 0, 0, BOTTOM);
   // bottom right back
-  vertices[123] = get_points(1, 0, 0, BACK);
-  vertices[124] = get_points(1, 0, 0, BOTTOM);
-  vertices[125] = get_points(1, 0, 0, RIGHT);
+  vertices[123] = get_point(1, 0, 0, BACK);
+  vertices[124] = get_point(1, 0, 0, BOTTOM);
+  vertices[125] = get_point(1, 0, 0, RIGHT);
   //bottom left front
-  vertices[126] = get_points(0, 0, 1, FRONT);
-  vertices[127] = get_points(0, 0, 1, BOTTOM);
-  vertices[128] = get_points(0, 0, 1, LEFT);
+  vertices[126] = get_point(0, 0, 1, FRONT);
+  vertices[127] = get_point(0, 0, 1, BOTTOM);
+  vertices[128] = get_point(0, 0, 1, LEFT);
   // bottom right front
-  vertices[129] = get_points(1, 0, 1, FRONT);
-  vertices[130] = get_points(1, 0, 1, RIGHT);
-  vertices[131] = get_points(1, 0, 1, BOTTOM);
+  vertices[129] = get_point(1, 0, 1, FRONT);
+  vertices[130] = get_point(1, 0, 1, RIGHT);
+  vertices[131] = get_point(1, 0, 1, BOTTOM);
 
   // Hopefully we got that right (lord only knows) so now let's do the colors
   int i;
@@ -287,19 +293,25 @@ void generate_cubie(vec4 *vertices, vec4 *colors){
   for(i = 0; i < 6; i++){colors[i + clicker] = (vec4){1, 1, 1, 1};}
   // Wrap up the rest of the colors with black
   for(i = clicker + 6; i < VERTS_PER_CUBIE; i++){
-    colors[i] = {0, 0, 0, 1};
+    //colors[i] = (vec4){0, 0, 0, 1};
   }
 }
 
-// Generate one cubie centered at the origin
+// Generate all of the cubies and their colors
 void generate_vertices_and_colors(vec4 *vertices, vec4 *colors){
   int i, j;
+  // For each cubie, make it and put it in its place
   for(i = 0; i < 27; i++){
-    int x_pos = i % 3;
-    int z_pos = (i % 9) / 3;
-    int y_pos = i / 9;
-    generate_cubie(vertices[i * VERTS_PER_CUBIE], vertices[i * VERTS_PER_CUBIE]);
-    // TODO: generate transform for this cube and also attach it to the internal model somehow
+    float chunksize = 2 * far;
+    float x_pos = ((i % 9) / 3) * chunksize - chunksize;
+    float z_pos = (i / 9) * chunksize - chunksize;
+    float y_pos = (i % 3) * chunksize - chunksize;
+    generate_cubie(&(vertices[i * VERTS_PER_CUBIE]), &(colors[i * VERTS_PER_CUBIE]));
+    // generate transform for this cube and also attach it to the internal model somehow
+    mat4 optimus = translate(x_pos, y_pos, z_pos);
+    for(j = 0; j < VERTS_PER_CUBIE; j++){
+      vertices[i * VERTS_PER_CUBIE + j] = matrix_vector_multiply(optimus, vertices[i * VERTS_PER_CUBIE + j]);
+    }
   }
 }
 
@@ -308,8 +320,15 @@ void generate_normals(vec4 *vertices, vec4 *normals){
   // Literally all of these are triangles, sooooo...
   int i;
   vec4 v1, v2, v3;
+  // Add the normal vectors in, face by face
   for(i = 0; i < num_vertices; i++){
-    vec4 norm = normalize(cross_product())
+    v1 = vertices[i];
+    v2 = vertices[i + 1];
+    v3 = vertices[i + 2];
+    vec4 norm = normalize(cross_product(vector_sub(v2, v1), vector_sub(v3, v1)));
+    normals[i++] = norm;
+    normals[i++] = norm;
+    normals[i] = norm; // Plus Plus done by the for loop
   }
 }
 
@@ -321,6 +340,7 @@ void init(void)
 
     // Tell OpenGL where the shared vars are
     ctm_location = glGetUniformLocation(program, "ctm");
+    ctm = identity_matrix();
 
     // Load in all our data straightup
     vec4 vertices[num_vertices];
@@ -332,8 +352,11 @@ void init(void)
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors) + sizeof(normals), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors), sizeof(normals), normals);
+
 
     GLuint vPosition = glGetAttribLocation(program, "vPosition");
     glEnableVertexAttribArray(vPosition);
@@ -351,6 +374,8 @@ void init(void)
 		glEnable(GL_CULL_FACE);
     glClearColor(0.5, 0.7, 1.0, 1.0);
     glDepthRange(1,0);
+
+    glutPostRedisplay();
 }
 
 // Draw handler
@@ -361,11 +386,8 @@ void display(void)
     glPolygonMode(GL_BACK, GL_LINE);
 
     // Let's draw some cubies!
-    int i;
-    for(i = 0; i < 27; i++){
-      glUniform1fv(ctm_location, 1, (GLfloat *) &ctm);
-      glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-    }
+    glUniformMatrix4fv(ctm_location, 1, GL_FALSE, (GLfloat *) &ctm);
+    glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 
     glutSwapBuffers();
 }
@@ -375,12 +397,79 @@ void keyboard(unsigned char key, int mousex, int mousey)
     if(key == 'q'){
     	exit(0);
     }
-
-    // glutPostRedisplay();
 }
 
 // Tick handler
 void idle(void){
+  glutPostRedisplay();
+}
+
+// rotates the object according to what we got from the mouse
+void rotate_ctm(vec4 v1, vec4 v2){
+	// Fun fact, absolute value is equivalent to magnitude (it's just one-dimensional)
+	float abs1 = magnitude(v1);
+	float abs2 = magnitude(v2);
+
+	float denom = abs1 * abs2;
+	if(denom != 0){
+		float res = dot_product(v1, v2) / denom;
+		float angle = acos(res);
+
+		if(!isnan(angle)){
+			vec4 theperp = cross_product(scalar_vector_multiply(100, v1), scalar_vector_multiply(100, v2));
+
+			ctm = matrix_matrix_multiply(rotate_about_vector(theperp, angle), ctm);
+		}
+	}
+}
+
+// Mouse handler. Hopefully this will just plug in nicely.
+void mouse(int button, int state, int x, int y){
+	x -= 256;
+	y -= 256;
+	float xf = x / 256.0;
+	float yf = y / 256.0;
+
+	if(button == 3){
+		ctm = matrix_matrix_multiply(scale(1.02, 1.02, 1.02), ctm);
+	}
+	else if(button == 4){
+		float num = 1/ 1.02;
+		ctm = matrix_matrix_multiply(scale(num, num, num), ctm);
+	}
+	else if(button == GLUT_LEFT_BUTTON){
+		if(state == GLUT_DOWN){
+			// Check it's within our circle
+			if(xf*xf + yf*yf < 1){
+				clicked = 1;
+				old_mouse_pos = (vec4){xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			}
+		}
+		else if(state == GLUT_UP){
+			clicked = 0;
+			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 1.0};
+			release_vector = vector_sub(old_mouse_pos, cur_mouse_pos);
+		}
+	}
+	glutPostRedisplay();
+}
+
+// The motion handler for the mouse movement handler
+void motion(int x, int y){
+	if(clicked){
+		x -= 256;
+		y -= 256;
+		float xf = x / 256.0;
+		float yf = y / 256.0;
+
+		if(xf*xf + yf*yf < 1){
+			vec4 cur_mouse_pos = {xf, yf, 1 - sqrt(xf*xf + yf*yf), 0};
+			// Export that rotation to another function
+			rotate_ctm(old_mouse_pos, cur_mouse_pos);
+			old_mouse_pos = cur_mouse_pos;
+		}
+	}
+	glutPostRedisplay();
 }
 
 
@@ -396,6 +485,8 @@ int main(int argc, char **argv)
     init();
 
     glutDisplayFunc(display);
+	glutMouseFunc(mouse);
+	glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
 	  glutIdleFunc(idle);
 
